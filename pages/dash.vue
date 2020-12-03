@@ -1,6 +1,10 @@
 <template>
   <div>
-    <video ref="videoplayer" controls controlsList="nodownload noremoteplayback">
+    <video
+      ref="videoplayer"
+      controls
+      controlsList="nodownload noremoteplayback"
+    >
       <source src="~/assets/videos/job.mp4" type="video/mp4" />
       Your browser does not support the video tag.
     </video>
@@ -22,7 +26,7 @@
           +
         </button>
       </div>
-      <div>Volume: {{ VideoPlayer.volume }}</div>
+      <div>Volume: {{ $refs.videoplayer.volume }}</div>
     </div>
   </div>
 </template>
@@ -32,25 +36,23 @@ export default {
   data() {
     return {
       VideoPlayer: null,
-      volume: 0.5,
     }
   },
-  mounted() {
-    this.VideoPlayer = this.$refs.videoplayer
-  },
+
+  computed: {},
   methods: {
     doSomething() {
-      this.VideoPlayer.paused
-        ? this.VideoPlayer.play()
-        : this.VideoPlayer.pause()
+      this.$refs.videoplayer.paused
+        ? this.$refs.videoplayer.play()
+        : this.$refs.videoplayer.pause()
     },
     addVolume() {
-      if (this.VideoPlayer.volume < 1)
-        this.VideoPlayer.volume = this.VideoPlayer.volume + 0.1
+      if (this.$refs.videoplayer.volume < 1)
+        this.$refs.videoplayer.volume = this.$refs.videoplayer.volume + 0.1
     },
     reduceVolume() {
-      if (this.VideoPlayer.volume > 0)
-        this.VideoPlayer.volume = this.VideoPlayer.volume - 0.1
+      if (this.$refs.videoplayer.volume > 0)
+        this.$refs.videoplayer.volume = this.$refs.videoplayer.volume - 0.1
     },
   },
 }
