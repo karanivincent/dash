@@ -5,7 +5,7 @@
       @keydown.tab.prevent="videoPlayPause"
     >
       <div
-        class="flex flex-col justify-end divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300"
+        class="flex flex-col items-end divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
