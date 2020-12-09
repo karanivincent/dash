@@ -1,8 +1,8 @@
 <template>
   <div class="bg-gray-800 h-screen">
     <div
-      @keydown.tab.prevent="videoPlayPause"
       class="flex flex-col h-full justify-end mx-auto w-1/2"
+      @keydown.tab.prevent="videoPlayPause"
     >
       <div
         class="flex flex-col justify-end divide-y divide-orange-300 overflow-auto h-full min-h-32 bg-gray-300"
@@ -234,13 +234,14 @@
               <vue-slider
                 ref="slider"
                 v-model="slideValue"
-                :dragOnClick="true"
+                :drag-on-click="true"
                 :lazy="true"
-                @drag-start="videoPause('drag-start')"
-                @drag-end="seek"
                 :max="videoPlayer.duration"
                 tooltip="always"
                 :tooltip-formatter="(val) => timeFormat(val)"
+                @drag-start="videoPause"
+                @dragging="videoPause"
+                @drag-end="seek"
               ></vue-slider>
             </div>
 
@@ -285,6 +286,11 @@ export default {
       },
     }
   },
+  computed: {
+    playerState() {
+      return this.$refs.videoplayer
+    },
+  },
   mounted() {
     this.slider = this.$refs.slider
     this.video = this.$refs.videoplayer
@@ -295,37 +301,27 @@ export default {
     //   console.log(event)
     // })
     var setTime = (time) => {
-      this.videoPlayer.duration = Math.ceil(time)
+      this.videoPlayer.duration = Math.trunc(time)
     }
     // var videoPlayer = this.videoPlayer
     this.video.onloadedmetadata = function () {
       setTime(this.duration)
     }
   },
-  computed: {
-    playerState() {
-      return this.$refs.videoplayer
-    },
-  },
   methods: {
-    videoPause(from = 'default') {
+    videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
       }
-
-      console.log(from)
     },
     videoPlay() {
       if (this.video.paused === true) this.video.play()
     },
     seek() {
-      console.log(this.video.paused)
-
       this.video.currentTime = this.slider.getIndex()
-      this.video.onseeked = () => {
-        console.log('seeked')
-        this.videoPlay()
-      }
+      // this.video.onseeked = () => {
+      //   this.videoPlay()
+      // }
     },
 
     insertCaption(index) {
@@ -344,6 +340,7 @@ export default {
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
       var remainingSeconds = seconds % 60
+
       if (minutes > 59) {
         var hours = Math.floor(minutes / 60)
         var remainingMinutes = minutes % 60
@@ -353,16 +350,24 @@ export default {
           return (
             days +
             ':' +
-            remainingHours +
+            ('00' + remainingHours).slice(-2) +
             ':' +
-            remainingMinutes +
+            ('00' + remainingMinutes).slice(-2) +
             ':' +
-            remainingSeconds
+            ('00' + remainingSeconds).slice(-2)
           )
         }
-        return hours + ':' + remainingMinutes + ':' + remainingSeconds
+        return (
+          ('00' + hours).slice(-2) +
+          ':' +
+          ('00' + remainingMinutes).slice(-2) +
+          ':' +
+          ('00' + remainingSeconds).slice(-2)
+        )
       }
-      return minutes + ':' + remainingSeconds
+      return (
+        ('00' + minutes).slice(-2) + ':' + ('00' + remainingSeconds).slice(-2)
+      )
     },
 
     videoPlayPause() {
