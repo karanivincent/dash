@@ -5,7 +5,7 @@
       @keydown.tab.prevent="videoPlayPause"
     >
       <div
-        class="flex flex-col justify-end divide-y divide-orange-300 overflow-auto h-full min-h-32 bg-gray-300"
+        class="flex flex-col justify-end divide-y divide-orange-300 overflow-y-scroll h-full min-h-32 bg-gray-300"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
@@ -16,7 +16,6 @@
           rows="1"
           class="flex-none w-full h-full text-gray-800 font-medium outline-none p-1 bg-transparent focus:bg-white"
           :class="{ 'bg-white': i == captions.captionGroups.length - 2 }"
-          :hidden="i == captions.captionGroups.length - 1"
           @keydown.enter.prevent.native="insertCaption(i)"
         />
       </div>
@@ -237,7 +236,6 @@
                 :drag-on-click="true"
                 :lazy="true"
                 :max="videoPlayer.duration"
-                tooltip="always"
                 :tooltip-formatter="(val) => timeFormat(val)"
                 @drag-start="videoPause"
                 @dragging="videoPause"
@@ -325,17 +323,15 @@ export default {
     },
 
     insertCaption(index) {
-      this.captions.captionGroups.splice(index + 1, 0, {
+      index = index + 1
+      this.captions.captionGroups.splice(index, 0, {
         text: '',
         editTime: 0,
         syncTime: 0,
       })
-      index = index + 1
-      this.$refs['textarea-' + index][0].$el.style.visibility = 'visible'
-      this.$refs['textarea-' + index][0].$el.focus()
 
-      //   if (index < this.captions.captionGroups.length - 1)
-      //     this.$refs['textarea-' + index][0].$el.focus()
+      if (index < this.captions.captionGroups.length - 1)
+        this.$refs['textarea-' + index][0].$el.focus()
     },
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
