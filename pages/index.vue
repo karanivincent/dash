@@ -1,11 +1,8 @@
 <template>
   <div class="bg-gray-800 h-screen">
-    <div
-      class="flex flex-col h-full justify-end mx-auto w-1/2"
-      @keydown.tab.prevent="videoPlayPause"
-    >
+    <div class="flex flex-col h-full justify-end mx-auto w-1/2">
       <div
-        class="flex flex-col items-end divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300"
+        class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
@@ -17,6 +14,8 @@
           class="flex-none w-full h-full text-gray-800 font-medium outline-none p-1 bg-transparent focus:bg-white"
           :class="{ 'bg-white': i == captions.captionGroups.length - 2 }"
           @keydown.enter.prevent.native="insertCaption(i)"
+          @keydown.native="keypress"
+          @keyup.native="keypress"
         />
       </div>
       <div class="flex flex-col">
@@ -307,6 +306,9 @@ export default {
     }
   },
   methods: {
+    keypress(event) {
+      console.log(event)
+    },
     videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
