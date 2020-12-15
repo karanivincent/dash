@@ -6,16 +6,18 @@
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
+          :id="`textarea-${i}`"
           :key="i"
           :ref="`textarea-${i}`"
           v-model="group.text"
           :min-height="30"
           rows="1"
           class="flex-none w-full h-full text-gray-800 font-medium outline-none p-1 bg-transparent focus:bg-white"
-          :class="{ 'bg-white': i == captions.captionGroups.length - 2 }"
+          :class="{
+            'bg-white': i == captions.captionGroups.length - 2,
+          }"
           @keydown.enter.prevent.native="insertCaption(i)"
-          @keydown.native="keypress"
-          @keyup.native="keypress"
+          @keydown.native="keypress($event, i)"
         />
       </div>
       <div class="flex flex-col">
@@ -265,6 +267,7 @@ export default {
   components: {},
   data() {
     return {
+      buffer: null,
       slideValue: 0,
       slider: null,
       video: null,
@@ -275,10 +278,22 @@ export default {
       },
       captions: {
         captionGroups: [
-          { text: 'asdf asdf', editTime: 0, syncTime: 0 },
-          { text: ' lorem', editTime: 0, syncTime: 0 },
-          { text: 'asdf asdf', editTime: 0, syncTime: 0 },
-          { text: '', editTime: 0, syncTime: 0 },
+          { text: '0', editTime: 0, syncTime: 0 },
+          { text: '1', editTime: 0, syncTime: 0 },
+          { text: '2', editTime: 0, syncTime: 0 },
+          { text: '3', editTime: 0, syncTime: 0 },
+          { text: '4', editTime: 0, syncTime: 0 },
+          { text: '5', editTime: 0, syncTime: 0 },
+          { text: '6', editTime: 0, syncTime: 0 },
+          { text: '7', editTime: 0, syncTime: 0 },
+          { text: ' lorem', editTime: 1, syncTime: 0 },
+          {
+            text:
+              'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Debitis soluta aspernatur assumenda perspiciatis, quidem, perferendis autem aperiam suscipit vero odio nam alias unde. Facere, necessitatibus officia? Perferendis quia accusantium possimus.',
+            editTime: 0,
+            syncTime: 0,
+          },
+          { text: '', editTime: 2, syncTime: 0 },
         ],
       },
     }
@@ -306,8 +321,128 @@ export default {
     }
   },
   methods: {
-    keypress(event) {
+    getLineNumber(textarea) {
+      console.log(
+        'Linenumber:',
+        textarea.value.substr(0, textarea.selectionStart).split('\n').length
+      )
+    },
+    countLines(textarea) {
+      if (this.buffer == null) {
+        this.buffer = document.createElement('textarea')
+        this.buffer.style.border = 'none'
+        this.buffer.style.height = '0'
+        this.buffer.style.overflow = 'hidden'
+        this.buffer.style.padding = '0'
+        this.buffer.style.position = 'absolute'
+        this.buffer.style.left = '0'
+        this.buffer.style.top = '0'
+        this.buffer.style.zIndex = '-1'
+        document.body.appendChild(this.buffer)
+      }
+
+      var cs = window.getComputedStyle(textarea)
+      var pl = parseInt(cs.paddingLeft)
+      var pr = parseInt(cs.paddingRight)
+      var lh = parseInt(cs.lineHeight)
+
+      // [cs.lineHeight] may return 'normal', which means line height = font size.
+      if (isNaN(lh)) lh = parseInt(cs.fontSize)
+
+      // Copy content width.
+      this.buffer.style.width = textarea.clientWidth - pl - pr + 'px'
+
+      // Copy text properties.
+      this.buffer.style.font = cs.font
+      this.buffer.style.letterSpacing = cs.letterSpacing
+      this.buffer.style.whiteSpace = cs.whiteSpace
+      this.buffer.style.wordBreak = cs.wordBreak
+      this.buffer.style.wordSpacing = cs.wordSpacing
+      this.buffer.style.wordWrap = cs.wordWrap
+
+      // Copy value.
+      this.buffer.value = textarea.value
+
+      var result = Math.floor(this.buffer.scrollHeight / lh)
+      if (result == 0) result = 1
+
+      return result
+    },
+    setCaretPosition(elem, caretPos) {
+      if (elem != null) {
+        if (elem.$el.createTextRange) {
+          var range = elem.$el.createTextRange()
+          range.move('character', caretPos)
+          range.select()
+        } else {
+          if (elem.$el.selectionStart) {
+            console.log(elem)
+
+            elem.$el.focus()
+            elem.$el.setSelectionRange(caretPos, caretPos)
+          } else elem.$el.focus()
+        }
+      }
+    },
+    keypress(event, i) {
       console.log(event)
+      var elem = null
+      if (event.key == 'ArrowUp') {
+        if (i != 0 && event.target.selectionEnd === 0) {
+          elem = this.$refs[`textarea-${i - 1}`][0]
+
+          console.log(elem)
+          event.preventDefault()
+
+          this.setCaretPosition(elem, event.target.selectionEnd)
+        }
+      } else if (event.key == 'ArrowDown') {
+        if (
+          i < this.captions.captionGroups.length - 1 &&
+          event.target.selectionEnd === event.target.value.length
+        ) {
+          elem = this.$refs[`textarea-${i + 1}`][0]
+
+          event.preventDefault()
+
+          this.setCaretPosition(elem, 0)
+        }
+      } else if (event.key == 'ArrowLeft') {
+        if (i != 0 && event.target.selectionEnd === 0) {
+          elem = this.$refs[`textarea-${i - 1}`][0]
+          console.log(elem.value.length)
+          event.preventDefault()
+
+          this.setCaretPosition(elem, elem.value.length)
+        }
+      } else if (event.key == 'ArrowRight') {
+        if (
+          i < this.captions.captionGroups.length - 1 &&
+          event.target.selectionEnd === event.target.value.length
+        ) {
+          elem = this.$refs[`textarea-${i + 1}`][0]
+          console.log(elem.value.length)
+          event.preventDefault()
+
+          this.setCaretPosition(elem, 0)
+        }
+      } else if (event.key == 'Backspace') {
+        if (i != 0 && event.target.selectionEnd === 0) {
+          event.preventDefault()
+
+          const precedingCaption = this.captions.captionGroups[i - 1]
+          const currentCaption = this.captions.captionGroups[i]
+          this.captions.captionGroups[i - 1].text =
+            precedingCaption.text + currentCaption.text
+          this.captions.captionGroups.splice(i, 1)
+          elem = this.$refs[`textarea-${i - 1}`][0]
+          const cursor_location = elem.value.length
+          this.$nextTick(() => {
+            console.log(elem.value)
+            this.setCaretPosition(elem, cursor_location)
+          })
+        }
+      }
     },
     videoPause() {
       if (this.video.paused === false) {
