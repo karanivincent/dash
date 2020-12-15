@@ -2,7 +2,7 @@
   <div class="bg-gray-800 h-screen">
     <div class="flex flex-col h-full justify-end mx-auto w-1/2">
       <div
-        class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300"
+        class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 pb-2"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
@@ -13,10 +13,6 @@
           :min-height="30"
           rows="1"
           class="flex-none w-full h-full text-gray-800 font-medium outline-none p-1 bg-transparent focus:bg-white"
-          :class="{
-            'bg-white': i == captions.captionGroups.length - 2,
-          }"
-          @keydown.enter.prevent.native="insertCaption(i)"
           @keydown.native="keypress($event, i)"
         />
       </div>
@@ -368,6 +364,7 @@ export default {
 
       return result
     },
+
     setCaretPosition(elem, caretPos) {
       if (elem != null) {
         if (elem.$el.createTextRange) {
@@ -385,7 +382,6 @@ export default {
       }
     },
     keypress(event, i) {
-      console.log(event)
       var elem = null
       if (event.key == 'ArrowUp') {
         if (i != 0 && event.target.selectionEnd === 0) {
@@ -436,12 +432,22 @@ export default {
             precedingCaption.text + currentCaption.text
           this.captions.captionGroups.splice(i, 1)
           elem = this.$refs[`textarea-${i - 1}`][0]
-          const cursor_location = elem.value.length
+          const set_cursor = elem.value.length
           this.$nextTick(() => {
             console.log(elem.value)
-            this.setCaretPosition(elem, cursor_location)
+            this.setCaretPosition(elem, set_cursor)
           })
         }
+      } else if (event.key == 'Enter') {
+        event.preventDefault()
+        const cursor_location = event.target.selectionEnd
+        const selection_end = event.target.value.length
+        // select text
+        const text = event.target.value
+        const currentText = text.substring(0, cursor_location)
+        this.captions.captionGroups[i].text = currentText
+        const createdText = text.substring(cursor_location, selection_end)
+        this.insertCaption(i, createdText)
       }
     },
     videoPause() {
@@ -459,16 +465,25 @@ export default {
       // }
     },
 
-    insertCaption(index) {
+    insertCaption(index, text) {
+      // get current caption cursor position
+
+      //  get current caption length
+      // select text between cursor and end
       index = index + 1
       this.captions.captionGroups.splice(index, 0, {
-        text: '',
+        text: text,
         editTime: 0,
         syncTime: 0,
       })
 
-      if (index < this.captions.captionGroups.length - 1)
-        this.$refs['textarea-' + index][0].$el.focus()
+      this.$nextTick(() => {
+        var elem = this.$refs[`textarea-${index}`][0]
+        this.setCaretPosition(elem, 0)
+      })
+
+      // if (index < this.captions.captionGroups.length - 1)
+      //   this.$refs['textarea-' + index][0].$el.focus()
     },
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
