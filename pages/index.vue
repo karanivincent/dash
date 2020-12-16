@@ -381,75 +381,7 @@ export default {
         }
       }
     },
-    keypress(event, i) {
-      var elem = null
-      if (event.key == 'ArrowUp') {
-        if (i != 0 && event.target.selectionEnd === 0) {
-          elem = this.$refs[`textarea-${i - 1}`][0]
 
-          console.log(elem)
-          event.preventDefault()
-
-          this.setCaretPosition(elem, event.target.selectionEnd)
-        }
-      } else if (event.key == 'ArrowDown') {
-        if (
-          i < this.captions.captionGroups.length - 1 &&
-          event.target.selectionEnd === event.target.value.length
-        ) {
-          elem = this.$refs[`textarea-${i + 1}`][0]
-
-          event.preventDefault()
-
-          this.setCaretPosition(elem, 0)
-        }
-      } else if (event.key == 'ArrowLeft') {
-        if (i != 0 && event.target.selectionEnd === 0) {
-          elem = this.$refs[`textarea-${i - 1}`][0]
-          console.log(elem.value.length)
-          event.preventDefault()
-
-          this.setCaretPosition(elem, elem.value.length)
-        }
-      } else if (event.key == 'ArrowRight') {
-        if (
-          i < this.captions.captionGroups.length - 1 &&
-          event.target.selectionEnd === event.target.value.length
-        ) {
-          elem = this.$refs[`textarea-${i + 1}`][0]
-          console.log(elem.value.length)
-          event.preventDefault()
-
-          this.setCaretPosition(elem, 0)
-        }
-      } else if (event.key == 'Backspace') {
-        if (i != 0 && event.target.selectionEnd === 0) {
-          event.preventDefault()
-
-          const precedingCaption = this.captions.captionGroups[i - 1]
-          const currentCaption = this.captions.captionGroups[i]
-          this.captions.captionGroups[i - 1].text =
-            precedingCaption.text + currentCaption.text
-          this.captions.captionGroups.splice(i, 1)
-          elem = this.$refs[`textarea-${i - 1}`][0]
-          const set_cursor = elem.value.length
-          this.$nextTick(() => {
-            console.log(elem.value)
-            this.setCaretPosition(elem, set_cursor)
-          })
-        }
-      } else if (event.key == 'Enter') {
-        event.preventDefault()
-        const cursor_location = event.target.selectionEnd
-        const selection_end = event.target.value.length
-        // select text
-        const text = event.target.value
-        const currentText = text.substring(0, cursor_location)
-        this.captions.captionGroups[i].text = currentText
-        const createdText = text.substring(cursor_location, selection_end)
-        this.insertCaption(i, createdText)
-      }
-    },
     videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
@@ -463,6 +395,97 @@ export default {
       // this.video.onseeked = () => {
       //   this.videoPlay()
       // }
+    },
+    keypress(event, i) {
+      switch (event.key) {
+        case 'ArrowUp':
+          if (i != 0 && event.target.selectionEnd === 0) {
+            var elem = this.$refs[`textarea-${i - 1}`][0]
+            console.log(elem)
+            event.preventDefault()
+
+            this.setCaretPosition(elem, event.target.selectionEnd)
+          }
+          break
+        case 'ArrowDown':
+          if (
+            i < this.captions.captionGroups.length - 1 &&
+            event.target.selectionEnd === event.target.value.length
+          ) {
+            elem = this.$refs[`textarea-${i + 1}`][0]
+
+            event.preventDefault()
+
+            this.setCaretPosition(elem, 0)
+          }
+          break
+        case 'ArrowLeft':
+          if (i != 0 && event.target.selectionEnd === 0) {
+            elem = this.$refs[`textarea-${i - 1}`][0]
+            console.log(elem.value.length)
+            event.preventDefault()
+
+            this.setCaretPosition(elem, elem.value.length)
+          }
+          break
+        case 'ArrowRight':
+          if (
+            i < this.captions.captionGroups.length - 1 &&
+            event.target.selectionEnd === event.target.value.length
+          ) {
+            elem = this.$refs[`textarea-${i + 1}`][0]
+            console.log(elem.value.length)
+            event.preventDefault()
+
+            this.setCaretPosition(elem, 0)
+          }
+          break
+        case 'Delete':
+          if (
+            i < this.captions.captionGroups.length - 1 &&
+            event.target.selectionEnd === event.target.value.length
+          ) {
+            event.preventDefault()
+            const currentCaption = this.captions.captionGroups[i]
+            const nextCaption = this.captions.captionGroups[i + 1]
+            currentCaption.text = currentCaption.text + nextCaption.text
+
+            this.captions.captionGroups.splice(i + 1, 1)
+            elem = this.$refs[`textarea-${i}`][0]
+            const set_cursor = elem.value.length
+            this.$nextTick(() => {
+              console.log(elem.value)
+              this.setCaretPosition(elem, set_cursor)
+            })
+          }
+          break
+        case 'Backspace':
+          if (i != 0 && event.target.selectionEnd === 0) {
+            event.preventDefault()
+            const precedingCaption = this.captions.captionGroups[i - 1]
+            const currentCaption = this.captions.captionGroups[i]
+            this.captions.captionGroups[i - 1].text =
+              precedingCaption.text + currentCaption.text
+            this.captions.captionGroups.splice(i, 1)
+            elem = this.$refs[`textarea-${i - 1}`][0]
+            const set_cursor = elem.value.length
+            this.$nextTick(() => {
+              console.log(elem.value)
+              this.setCaretPosition(elem, set_cursor)
+            })
+          }
+          break
+        case 'Enter':
+          event.preventDefault()
+          var cursor_location = event.target.selectionEnd
+          var selection_end = event.target.value.length
+          // select text
+          var text = event.target.value
+          var currentText = text.substring(0, cursor_location)
+          this.captions.captionGroups[i].text = currentText
+          var createdText = text.substring(cursor_location, selection_end)
+          this.insertCaption(i, createdText)
+      }
     },
 
     insertCaption(index, text) {
