@@ -475,6 +475,21 @@ export default {
             })
           }
           break
+        case 'Home':
+          if (i != 0) {
+            if (event.target.selectionEnd === 0) {
+              event.preventDefault()
+              elem = this.$refs['textarea-0'][0]
+              this.setCaretPosition(elem, 0)
+            } else {
+              event.preventDefault()
+              elem = this.$refs[`textarea-${i}`][0]
+              this.setCaretPosition(elem, 0)
+            }
+          }
+
+          break
+
         case 'Enter':
           event.preventDefault()
           var cursor_location = event.target.selectionEnd
