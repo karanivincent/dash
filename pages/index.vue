@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-800 h-screen">
+  <div class="bg-gray-800 h-screen" @keydown.tab.prevent="videoPlayPause">
     <div class="flex flex-col h-full justify-end mx-auto w-1/2">
       <div
         class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
@@ -20,6 +20,7 @@
       <div class="flex flex-col">
         <div class="flex space-x-1">
           <div class="flex flex-col items-center w-10 -ml-10 mt-5 gap-2">
+            <!-- play button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
               @click="videoPlayPause"
@@ -53,6 +54,7 @@
                 </svg>
               </div>
             </button>
+            <!-- rewind button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
               @click="reduceVolume"
@@ -68,12 +70,13 @@
                 ></path>
               </svg>
             </button>
+            <!-- volume button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
-              @click="reduceVolume"
+              class="flex flex-col items-center px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              @click="addVolume"
             >
               <svg
-                class="w-8 h-8"
+                class="w-8 h-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +87,9 @@
                   clip-rule="evenodd"
                 ></path>
               </svg>
+              <div class="h-4 text-xs font-thin">{{ videoPlayer.volume }}%</div>
             </button>
+            <!-- playback speed button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
               @click="reduceVolume"
@@ -106,6 +111,7 @@
                 />
               </svg>
             </button>
+            <!-- play button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
               @click="addVolume"
@@ -281,10 +287,14 @@ export default {
     videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
+        this.videoPlayer.paused = true
       }
     },
     videoPlay() {
-      if (this.video.paused === true) this.video.play()
+      if (this.video.paused === true) {
+        this.video.play()
+        this.videoPlayer.paused = false
+      }
     },
     seek() {
       this.video.currentTime = this.slider.getIndex()
@@ -476,12 +486,16 @@ export default {
       }
     },
     addVolume() {
-      if (this.$refs.videoplayer.volume < 1)
-        this.$refs.videoplayer.volume = this.$refs.videoplayer.volume + 0.1
+      if (this.videoPlayer.volume < 100)
+        this.videoPlayer.volume = this.videoPlayer.volume + 5
+
+      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
     },
     reduceVolume() {
-      if (this.$refs.videoplayer.volume > 0)
-        this.$refs.videoplayer.volume = this.$refs.videoplayer.volume - 0.1
+      if (this.videoPlayer.volume > 0)
+        this.videoPlayer.volume = this.videoPlayer.volume - 5
+
+      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
     },
   },
 }
