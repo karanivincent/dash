@@ -57,7 +57,7 @@
             <!-- rewind button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
-              @click="reduceVolume"
+              @click="seek('rewind')"
             >
               <svg
                 class="w-8 h-8"
@@ -111,10 +111,10 @@
                 />
               </svg>
             </button>
-            <!-- play button -->
+            <!-- forward button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
-              @click="addVolume"
+              @click="seek('forward')"
             >
               <svg
                 class="w-8 h-8"
@@ -139,7 +139,7 @@
                 :tooltip-formatter="(val) => timeFormat(val)"
                 @drag-start="videoPause"
                 @dragging="videoPause"
-                @drag-end="seek"
+                @drag-end="seek('slider')"
               ></vue-slider>
             </div>
 
@@ -174,6 +174,10 @@ export default {
         paused: true,
         volume: 100,
         duration: 0,
+        seekInterval: {
+          forward: 2,
+          rewind: 2,
+        },
       },
       captions: {
         captionGroups: [
@@ -296,11 +300,23 @@ export default {
         this.videoPlayer.paused = false
       }
     },
-    seek() {
-      this.video.currentTime = this.slider.getIndex()
-      // this.video.onseeked = () => {
-      //   this.videoPlay()
-      // }
+    seek(source) {
+      switch (source) {
+        case 'forward':
+          this.video.currentTime += this.videoPlayer.seekInterval.forward
+
+          break
+        case 'rewind':
+          this.video.currentTime -= this.videoPlayer.seekInterval.rewind
+
+          break
+        case 'slider':
+          this.video.currentTime = this.slider.getIndex()
+          // this.video.onseeked = () => {
+          //   this.videoPlay()
+          // }
+          break
+      }
     },
     keypress(event, i) {
       switch (event.key) {
@@ -354,7 +370,7 @@ export default {
             event.preventDefault()
             const currentCaption = this.captions.captionGroups[i]
             const nextCaption = this.captions.captionGroups[i + 1]
-            currentCaption.text = currentCaption.text + nextCaption.text
+            currentCaption.text += nextCaption.text
 
             this.captions.captionGroups.splice(i + 1, 1)
             elem = this.$refs[`textarea-${i}`][0]
@@ -381,35 +397,6 @@ export default {
             })
           }
           break
-        // case 'Home':
-        //   if (i != 0) {
-        //     if (event.target.selectionEnd === 0) {
-        //       event.preventDefault()
-        //       elem = this.$refs['textarea-0'][0]
-        //       this.setCaretPosition(elem, 0)
-        //     } else {
-        //       event.preventDefault()
-        //       elem = this.$refs[`textarea-${i}`][0]
-        //       this.setCaretPosition(elem, 0)
-        //     }
-        //   }
-
-        //   break
-        // case 'End':
-        //   if (i < this.captions.captionGroups.length - 1) {
-        //     if (event.target.selectionEnd === 0) {
-        //       event.preventDefault()
-        //       elem = this.$refs['textarea-0'][0]
-        //       this.setCaretPosition(elem, 0)
-        //     } else {
-        //       event.preventDefault()
-        //       elem = this.$refs[`textarea-${i}`][0]
-        //       this.setCaretPosition(elem, 0)
-        //     }
-        //   }
-
-        //   break
-
         case 'Enter':
           event.preventDefault()
           var cursor_location = event.target.selectionEnd
@@ -486,16 +473,14 @@ export default {
       }
     },
     addVolume() {
-      if (this.videoPlayer.volume < 100)
-        this.videoPlayer.volume = this.videoPlayer.volume + 5
+      if (this.videoPlayer.volume < 100) this.videoPlayer.volume += 5
 
-      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
+      this.$refs.videoplayer.volume /= 100
     },
     reduceVolume() {
-      if (this.videoPlayer.volume > 0)
-        this.videoPlayer.volume = this.videoPlayer.volume - 5
+      if (this.videoPlayer.volume > 0) this.videoPlayer.volume -= 5
 
-      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
+      this.$refs.videoplayer.volume /= 100
     },
   },
 }
