@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-gray-800 h-screen" @keydown.tab.prevent="videoPlayPause">
+  <div class="bg-gray-800 h-screen pb-12">
     <div class="flex flex-col h-full justify-end mx-auto w-1/2">
       <div
         class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
@@ -17,7 +17,7 @@
         />
       </div>
 
-      <div class="flex flex-col">
+      <div class="flex flex-col" @keydown="keypress($event)">
         <div class="flex space-x-1">
           <div class="flex flex-col items-center w-10 -ml-10 mt-5 gap-2">
             <!-- play button -->
@@ -92,11 +92,10 @@
             <!-- playback speed button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
-              @click="reduceVolume"
+              @click="setPlaybackspeed('fast')"
             >
               <svg
-                version="1.1"
-                class="w-8 h-8"
+                class="w-8 h-5"
                 viewBox="0 0 488.6 488.6"
                 fill="currentColor"
               >
@@ -110,6 +109,9 @@
 			c-23.1-9.2-47.6-13.9-72.7-13.9c-108,0-195.9,87.9-195.9,195.9c0,13.4-10.8,24.2-24.2,24.2C10.8,365.6,0,354.8,0,341.4z"
                 />
               </svg>
+              <div class="h-4 text-xs font-thin">
+                {{ videoPlayer.playbackspeed }}%
+              </div>
             </button>
             <!-- forward button -->
             <button
@@ -149,6 +151,7 @@
               controlsList="nodownload noremoteplayback"
               preload="metadata"
               class="focus:outline-none"
+              @click.prevent
             >
               <source src="~/assets/videos/job.mp4" type="video/mp4" />
 
@@ -174,8 +177,9 @@ export default {
         paused: true,
         volume: 100,
         duration: 0,
+        playbackspeed: 100,
         seekInterval: {
-          forward: 2,
+          forward: 20,
           rewind: 2,
         },
       },
@@ -318,7 +322,7 @@ export default {
           break
       }
     },
-    keypress(event, i) {
+    keypress(event, i = -1) {
       switch (event.key) {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
@@ -407,6 +411,17 @@ export default {
           this.captions.captionGroups[i].text = currentText
           var createdText = text.substring(cursor_location, selection_end)
           this.insertCaption(i, createdText)
+          break
+        case 'Tab':
+          event.preventDefault()
+          if (event.shiftKey) {
+            console.log('with shiftkey')
+            event.preventDefault()
+            this.seek('rewind')
+          } else {
+            console.log('No shiftkey')
+            this.videoPlayPause()
+          }
       }
     },
 
@@ -475,12 +490,31 @@ export default {
     addVolume() {
       if (this.videoPlayer.volume < 100) this.videoPlayer.volume += 5
 
-      this.$refs.videoplayer.volume /= 100
+      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
     },
     reduceVolume() {
       if (this.videoPlayer.volume > 0) this.videoPlayer.volume -= 5
 
-      this.$refs.videoplayer.volume /= 100
+      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
+    },
+    setPlaybackspeed(speed) {
+      switch (speed) {
+        case 'fast':
+          if (this.videoPlayer.playbackspeed < 200) {
+            this.videoPlayer.playbackspeed += 10
+            this.$refs.videoplayer.playbackRate =
+              this.videoPlayer.playbackspeed / 100
+            console.log(this.$refs.videoplayer.playbackRate)
+          }
+          break
+        case 'slow':
+          if (this.videoPlayer.playbackspeed > 0) {
+            this.videoPlayer.playbackspeed -= 10
+            this.$refs.videoplayer.playbackRate =
+              this.videoPlayer.playbackspeed / 100
+          }
+          break
+      }
     },
   },
 }
