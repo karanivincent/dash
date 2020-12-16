@@ -2,6 +2,7 @@
   <div class="container">
     <div>
       <Logo />
+
       <h1 class="title">Dash</h1>
       <Canvas></Canvas>
     </div>
