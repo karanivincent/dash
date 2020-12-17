@@ -1,8 +1,21 @@
 <template>
-  <div class="bg-gray-800 h-screen pb-12">
-    <div class="flex flex-col h-full justify-end mx-auto w-1/2">
+  <div class="bg-gray-800 h-screen pt-2 pb-12 grid grid-cols-5">
+    <div class="col-span-1 col-start-1 text-center">
+      <label
+        class="px-6 py-2 font-semibold text-gray-200 bg-purple-600 cursor-pointer hover:bg-purple-700 focus:outline-none rounded-md"
+      >
+        <input
+          type="file"
+          accept="audio/*,video/*"
+          class="hidden"
+          @change="playSelectedvideo"
+        />
+        Upload
+      </label>
+    </div>
+    <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <div
-        class="flex flex-col divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
+        class="flex flex-col justify-end divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
@@ -18,7 +31,8 @@
       </div>
 
       <div class="flex flex-col" @keydown="keypress($event)">
-        <div class="flex space-x-1">
+        <div class="flex space-x-1 h-auto">
+          <!-- buttons div -->
           <div class="flex flex-col items-center w-10 -ml-10 mt-5 gap-2">
             <!-- play button -->
             <button
@@ -101,12 +115,12 @@
               >
                 <path
                   d="M188.5,270.3c-24.4,28.1-23.2,71.7,2.6,98.6c14.4,15.1,33.7,22.6,52.9,22.6c18.8,0,37.5-7.2,51.8-21.5
-			c6.5-6.5,11.6-14,15.1-21.9l0,0l94.5-183.2c2.5-5.2-2.9-10.6-8.1-8.1l-183.2,94.5l0,0C204.6,255.5,195.9,261.9,188.5,270.3z
-			 M221.9,296.1c6.1-6.1,14.1-9.2,22.1-9.2s16,3.1,22.2,9.2c12.2,12.2,12.2,32.1,0,44.3c-6.1,6.1-14.1,9.2-22.2,9.2
-			c-8,0-16-3.1-22.1-9.2C209.6,328.1,209.6,308.3,221.9,296.1z M440.2,341.4c0-34.6-9.1-68.6-26.4-98.3c-6.7-11.6-2.8-26.4,8.8-33.1
-			c11.6-6.7,26.4-2.8,33.1,8.8c21.5,37.1,32.9,79.5,32.9,122.6c0,13.4-10.8,24.2-24.2,24.2C451.1,365.6,440.2,354.8,440.2,341.4z
-			 M0,341.4C0,206.7,109.6,97.1,244.3,97.1c31.3,0,61.8,5.8,90.6,17.4c12.4,5,18.4,19,13.5,31.4c-5,12.4-19,18.4-31.4,13.5
-			c-23.1-9.2-47.6-13.9-72.7-13.9c-108,0-195.9,87.9-195.9,195.9c0,13.4-10.8,24.2-24.2,24.2C10.8,365.6,0,354.8,0,341.4z"
+			              c6.5-6.5,11.6-14,15.1-21.9l0,0l94.5-183.2c2.5-5.2-2.9-10.6-8.1-8.1l-183.2,94.5l0,0C204.6,255.5,195.9,261.9,188.5,270.3z
+			              M221.9,296.1c6.1-6.1,14.1-9.2,22.1-9.2s16,3.1,22.2,9.2c12.2,12.2,12.2,32.1,0,44.3c-6.1,6.1-14.1,9.2-22.2,9.2
+			              c-8,0-16-3.1-22.1-9.2C209.6,328.1,209.6,308.3,221.9,296.1z M440.2,341.4c0-34.6-9.1-68.6-26.4-98.3c-6.7-11.6-2.8-26.4,8.8-33.1
+			              c11.6-6.7,26.4-2.8,33.1,8.8c21.5,37.1,32.9,79.5,32.9,122.6c0,13.4-10.8,24.2-24.2,24.2C451.1,365.6,440.2,354.8,440.2,341.4z
+			              M0,341.4C0,206.7,109.6,97.1,244.3,97.1c31.3,0,61.8,5.8,90.6,17.4c12.4,5,18.4,19,13.5,31.4c-5,12.4-19,18.4-31.4,13.5
+			              c-23.1-9.2-47.6-13.9-72.7-13.9c-108,0-195.9,87.9-195.9,195.9c0,13.4-10.8,24.2-24.2,24.2C10.8,365.6,0,354.8,0,341.4z"
                 />
               </svg>
               <div class="h-4 text-xs font-thin">
@@ -130,6 +144,7 @@
               </svg>
             </button>
           </div>
+          <!-- video div -->
           <div class="w-auto">
             <div class="h-7 py-auto">
               <vue-slider
@@ -227,6 +242,24 @@ export default {
     }
   },
   methods: {
+    playSelectedvideo(event) {
+      var file = event.target.files[0]
+      if (file) {
+        var type = file.type
+        var videoNode = this.$refs.videoplayer
+        var canPlay = videoNode.canPlayType(type)
+        canPlay === '' ? (canPlay = false) : (canPlay = true)
+
+        if (!canPlay) {
+          console.log("Can't play video")
+          return
+        }
+
+        var fileURL = URL.createObjectURL(file)
+        videoNode.src = fileURL
+        this.videoPlayer.paused = true
+      }
+    },
     getLineNumber(textarea) {
       console.log(
         'Linenumber:',
@@ -504,7 +537,6 @@ export default {
             this.videoPlayer.playbackspeed += 10
             this.$refs.videoplayer.playbackRate =
               this.videoPlayer.playbackspeed / 100
-            console.log(this.$refs.videoplayer.playbackRate)
           }
           break
         case 'slow':
