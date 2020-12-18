@@ -14,8 +14,9 @@
       </label>
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
+      <!-- text section -->
       <div
-        class="flex flex-col justify-end divide-y divide-orange-300 overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
+        class="flex flex-col overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
       >
         <textarea-autosize
           v-for="(group, i) in captions.captionGroups"
@@ -25,15 +26,16 @@
           v-model="group.text"
           :min-height="30"
           rows="1"
-          class="flex-none w-full h-full text-gray-800 font-medium outline-none px-2 py-1 bg-transparent focus:bg-white"
+          cols="20"
+          class="flex-none h-full text-gray-800 border-b border-orange-300 font-semibold leading-loose text-lg outline-none px-2 py-1 bg-transparent focus:bg-white"
           @keydown.native="keypress($event, i)"
         />
       </div>
-
-      <div class="flex flex-col" @keydown="keypress($event)">
-        <div class="flex space-x-1 h-auto">
+      <!-- video section -->
+      <div class="flex flex-col max-h-1/2" @keydown="keypress($event)">
+        <div class="flex space-x-2 h-auto overflow-visible">
           <!-- buttons div -->
-          <div class="flex flex-col items-center w-10 -ml-10 mt-5 gap-2">
+          <div class="flex flex-col items-center w-10 -ml-12 mt-5 gap-2">
             <!-- play button -->
             <button
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
@@ -146,18 +148,26 @@
           </div>
           <!-- video div -->
           <div class="w-auto">
-            <div class="h-7 py-auto">
-              <vue-slider
-                ref="slider"
-                v-model="slideValue"
-                :drag-on-click="true"
-                :lazy="true"
-                :max="videoPlayer.duration"
-                :tooltip-formatter="(val) => timeFormat(val)"
-                @drag-start="videoPause"
-                @dragging="videoPause"
-                @drag-end="seek('slider')"
-              ></vue-slider>
+            <!-- slider section -->
+            <div
+              class="flex items-center bg-gray-600 text-center text-gray-300"
+            >
+              <div class="w-16">{{ videoPlayer.currentTime }}</div>
+
+              <div class="h-7 py-auto flex-grow">
+                <vue-slider
+                  ref="slider"
+                  v-model="slideValue"
+                  :drag-on-click="true"
+                  :lazy="true"
+                  :max="videoPlayer.duration"
+                  :tooltip-formatter="(val) => timeFormat(val)"
+                  @drag-start="videoPause"
+                  @dragging="videoPause"
+                  @drag-end="seek('slider')"
+                ></vue-slider>
+              </div>
+              <div class="w-16">{{ timeFormat(videoPlayer.duration) }}</div>
             </div>
 
             <video
@@ -165,7 +175,7 @@
               controls
               controlsList="nodownload noremoteplayback"
               preload="metadata"
-              class="focus:outline-none"
+              class="focus:outline-none h-auto"
               @click.prevent
             >
               <source src="~/assets/videos/job.mp4" type="video/mp4" />
@@ -192,6 +202,7 @@ export default {
         paused: true,
         volume: 100,
         duration: 0,
+        currentTime: '00:00',
         playbackspeed: 100,
         seekInterval: {
           forward: 20,
@@ -199,23 +210,7 @@ export default {
         },
       },
       captions: {
-        captionGroups: [
-          { text: '0', editTime: 0, syncTime: 0 },
-          { text: '1', editTime: 0, syncTime: 0 },
-          { text: '2', editTime: 0, syncTime: 0 },
-          { text: '3', editTime: 0, syncTime: 0 },
-          { text: '4', editTime: 0, syncTime: 0 },
-          { text: '5', editTime: 0, syncTime: 0 },
-          { text: '6', editTime: 0, syncTime: 0 },
-          { text: '7', editTime: 0, syncTime: 0 },
-          { text: ' lorem', editTime: 1, syncTime: 0 },
-          {
-            text:
-              'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Debitis soluta aspernatur assumenda perspiciatis, quidem, perferendis autem aperiam suscipit vero odio nam alias unde. Facere, necessitatibus officia? Perferendis quia accusantium possimus.',
-            editTime: 0,
-            syncTime: 0,
-          },
-        ],
+        captionGroups: [{ text: ' lorem', editTime: 1, syncTime: 0 }],
       },
     }
   },
@@ -227,16 +222,15 @@ export default {
   mounted() {
     this.slider = this.$refs.slider
     this.video = this.$refs.videoplayer
+    // update slider index on video timeupdate
     this.video.addEventListener('timeupdate', () => {
       this.slider.setIndex(Math.trunc(this.video.currentTime))
     })
-    // this.slider.addEventListener('drag-end', (event) => {
-    //   console.log(event)
-    // })
+
+    // set video duration on videoPlayer variable
     var setTime = (time) => {
       this.videoPlayer.duration = Math.trunc(time)
     }
-    // var videoPlayer = this.videoPlayer
     this.video.onloadedmetadata = function () {
       setTime(this.duration)
     }
@@ -316,8 +310,6 @@ export default {
           range.select()
         } else {
           if (elem.$el.selectionStart) {
-            console.log(elem)
-
             elem.$el.focus()
             elem.$el.setSelectionRange(caretPos, caretPos)
           } else elem.$el.focus()
@@ -360,7 +352,6 @@ export default {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
             var elem = this.$refs[`textarea-${i - 1}`][0]
-            console.log(elem)
             event.preventDefault()
 
             this.setCaretPosition(elem, event.target.selectionEnd)
@@ -381,7 +372,6 @@ export default {
         case 'ArrowLeft':
           if (i != 0 && event.target.selectionEnd === 0) {
             elem = this.$refs[`textarea-${i - 1}`][0]
-            console.log(elem.value.length)
             event.preventDefault()
 
             this.setCaretPosition(elem, elem.value.length)
@@ -393,7 +383,6 @@ export default {
             event.target.selectionEnd === event.target.value.length
           ) {
             elem = this.$refs[`textarea-${i + 1}`][0]
-            console.log(elem.value.length)
             event.preventDefault()
 
             this.setCaretPosition(elem, 0)
@@ -413,7 +402,6 @@ export default {
             elem = this.$refs[`textarea-${i}`][0]
             const set_cursor = elem.value.length
             this.$nextTick(() => {
-              console.log(elem.value)
               this.setCaretPosition(elem, set_cursor)
             })
           }
@@ -429,7 +417,6 @@ export default {
             elem = this.$refs[`textarea-${i - 1}`][0]
             const set_cursor = elem.value.length
             this.$nextTick(() => {
-              console.log(elem.value)
               this.setCaretPosition(elem, set_cursor)
             })
           }
@@ -448,11 +435,9 @@ export default {
         case 'Tab':
           event.preventDefault()
           if (event.shiftKey) {
-            console.log('with shiftkey')
             event.preventDefault()
             this.seek('rewind')
           } else {
-            console.log('No shiftkey')
             this.videoPlayPause()
           }
       }
@@ -481,6 +466,7 @@ export default {
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
       var remainingSeconds = seconds % 60
+      var formatedTime = ''
 
       if (minutes > 59) {
         var hours = Math.floor(minutes / 60)
@@ -488,7 +474,7 @@ export default {
         if (hours > 23) {
           var days = Math.floor(hours / 24)
           var remainingHours = hours % 24
-          return (
+          formatedTime =
             days +
             ':' +
             ('00' + remainingHours).slice(-2) +
@@ -496,19 +482,21 @@ export default {
             ('00' + remainingMinutes).slice(-2) +
             ':' +
             ('00' + remainingSeconds).slice(-2)
-          )
         }
-        return (
+        formatedTime =
           ('00' + hours).slice(-2) +
           ':' +
           ('00' + remainingMinutes).slice(-2) +
           ':' +
           ('00' + remainingSeconds).slice(-2)
-        )
+      } else {
+        formatedTime =
+          ('00' + minutes).slice(-2) + ':' + ('00' + remainingSeconds).slice(-2)
       }
-      return (
-        ('00' + minutes).slice(-2) + ':' + ('00' + remainingSeconds).slice(-2)
-      )
+
+      this.videoPlayer.currentTime = formatedTime
+
+      return formatedTime
     },
 
     videoPlayPause() {
