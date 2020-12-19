@@ -126,7 +126,7 @@ div.test {
             </button>
             <!-- volume button -->
             <button
-              class="flex flex-col items-center px-1 py-1 rounded-md bg-gray-600 text-white text-2xl font-semibold focus:outline-none"
+              class="relative flex flex-col items-center px-1 py-1 rounded-md bg-gray-600 text-white text-2xl font-semibold focus:outline-none"
               @click="view.volumeSlider = !view.volumeSlider"
             >
               <svg
@@ -143,7 +143,7 @@ div.test {
               </svg>
               <div class="h-4 text-xs font-thin">{{ videoMeta.volume }}%</div>
               <div
-                class="absolute rounded-md overflow-hidden text-sm text-gray-800 bg-gray-100 w-48 h-32 mt-10"
+                class="absolute rounded-md overflow-hidden text-sm text-gray-800 bg-gray-100 w-48 h-32 mt-10 z-10"
                 :class="{
                   'flex flex-col': view.volumeSlider,
                   'hidden': !view.volumeSlider,
@@ -169,8 +169,9 @@ div.test {
                     <vue-slider
                       ref="volume-slider"
                       v-model="videoMeta.volume"
-                      dotSize="12"
-                      interval="5"
+                      tooltip="always"
+                      :dotSize="12"
+                      :interval="5"
                       :drag-on-click="true"
                       :lazy="true"
                       :max="100"
@@ -196,8 +197,8 @@ div.test {
             </button>
             <!-- playback speed button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
-              @click="setPlaybackspeed('fast')"
+              class="relative px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
+              @click="view.speedSlider = !view.speedSlider"
             >
               <svg
                 class="w-8 h-5"
@@ -218,18 +219,26 @@ div.test {
                 {{ videoMeta.playbackspeed }}%
               </div>
               <div
-                class="absolute hidden flex-col rounded-md overflow-hidden text-sm text-gray-800 bg-gray-100 w-40 h-32"
+                class="absolute rounded-md overflow-hidden text-sm text-gray-800 bg-gray-100 w-48 h-32 -ml-20 z-10"
+                :class="{
+                  'flex flex-col': view.speedSlider,
+                  'hidden': !view.speedSlider,
+                }"
               >
-                <div class="bg-blue-600 text-gray-100 py-1">Volume</div>
-                <div class="flex px-1 pt-2 -mb-6">
+                <div class="bg-blue-600 text-gray-100 py-1 h-8">Speed</div>
+                <div class="flex px-1 pt-10 items-center">
                   <div>Min</div>
-                  <div class="flex-grow">
+                  <div class="flex-grow px-2">
                     <vue-slider
-                      ref="volume-slider"
-                      v-model="slideValue"
+                      ref="speed-slider"
+                      v-model="videoMeta.playbackspeed"
+                      tooltip="always"
+                      :dotSize="12"
+                      :interval="5"
                       :drag-on-click="true"
                       :lazy="true"
-                      :max="100"
+                      :max="200"
+                      @change="setPlaybackspeed"
                     ></vue-slider>
                   </div>
                   <div>Max</div>
@@ -305,6 +314,7 @@ export default {
     return {
       view: {
         volumeSlider: false,
+        speedSlider: false,
       },
       buffer: null,
       slideValue: 0,
@@ -659,23 +669,8 @@ export default {
 
       this.$refs.videoMeta.volume = this.videoMeta.volume / 100
     },
-    setPlaybackspeed(speed) {
-      switch (speed) {
-        case 'fast':
-          if (this.videoMeta.playbackspeed < 200) {
-            this.videoMeta.playbackspeed += 10
-            this.$refs.videoMeta.playbackRate =
-              this.videoMeta.playbackspeed / 100
-          }
-          break
-        case 'slow':
-          if (this.videoMeta.playbackspeed > 0) {
-            this.videoMeta.playbackspeed -= 10
-            this.$refs.videoMeta.playbackRate =
-              this.videoMeta.playbackspeed / 100
-          }
-          break
-      }
+    setPlaybackspeed() {
+      this.$refs.videoMeta.playbackRate = this.videoMeta.playbackspeed / 100
     },
   },
 }
