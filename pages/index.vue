@@ -167,7 +167,7 @@
                   @drag-end="seek('slider')"
                 ></vue-slider>
               </div>
-              <div class="w-16">{{ timeFormat(videoPlayer.duration) }}</div>
+              <div class="w-16">{{ videoPlayer.durationString }}</div>
             </div>
 
             <video
@@ -202,6 +202,7 @@ export default {
         paused: true,
         volume: 100,
         duration: 0,
+        durationString: '00:00',
         currentTime: '00:00',
         playbackspeed: 100,
         seekInterval: {
@@ -230,6 +231,7 @@ export default {
     // set video duration on videoPlayer variable
     var setTime = (time) => {
       this.videoPlayer.duration = Math.trunc(time)
+      this.videoPlayer.durationString = this.timeFormat(time)
     }
     this.video.onloadedmetadata = function () {
       setTime(this.duration)
