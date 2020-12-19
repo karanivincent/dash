@@ -1,3 +1,9 @@
+<style>
+div.test {
+  overflow-y: scroll;
+}
+</style>
+
 <template>
   <div class="bg-gray-800 h-screen pt-2 pb-12 grid grid-cols-5">
     <div class="col-span-1 col-start-1 text-center">
@@ -15,46 +21,54 @@
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <!-- text section -->
-      <div
-        class="flex flex-col overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
-      >
+      <div class="overflow-y-scroll h-full min-h-32 -mr-10">
         <div
-          v-for="(group, i) in captions.captionGroups"
-          :key="i"
-          class="flex-none border-b border-orange-300"
+          class="flex flex-col h-auto min-h-full border-b-8 bg-gray-300 mr-6"
         >
           <div
-            class="flex items-center bg-transparent focus-within:bg-gray-100"
-            :class="{
-              'focus-within:bg-green-200':
-                group.text.length >= 29 && group.text.length < 48,
-              'focus-within:bg-orange-200':
-                group.text.length >= 48 && group.text.length <= 60,
-              'focus-within:bg-red-200': group.text.length > 60,
-            }"
+            v-for="(group, i) in captions.captionGroups"
+            :key="i"
+            class="flex-none border-b border-orange-300"
           >
-            <textarea-autosize
-              :id="`textarea-${i}`"
-              :ref="`textarea-${i}`"
-              v-model="group.text"
-              :min-height="30"
-              rows="1"
-              cols="20"
-              :placeholder="group.placeholder"
-              class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
-              @keydown.native="keypress($event, i)"
-            />
-            <!-- - last mother's day erica didn't get me a mother'  29 48-->
-
             <div
-              class="px-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
-              @click="seek('edit', group.editTimestamp.value)"
+              class="group flex items-center bg-transparent focus-within:bg-gray-100"
+              :class="{
+                'focus-within:bg-green-200':
+                  group.text.length >= 29 && group.text.length < 48,
+                'focus-within:bg-orange-200':
+                  group.text.length >= 48 && group.text.length <= 60,
+                'focus-within:bg-red-200': group.text.length > 60,
+              }"
             >
-              {{ group.editTimestamp.string }}
+              <textarea-autosize
+                :id="`textarea-${i}`"
+                :ref="`textarea-${i}`"
+                v-model="group.text"
+                :min-height="30"
+                rows="1"
+                cols="20"
+                :placeholder="group.placeholder"
+                class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
+                @keydown.native="keypress($event, i)"
+              />
+
+              <div
+                class="px-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
+                @click="seek('edit', group.editTimestamp.value)"
+              >
+                {{ group.editTimestamp.string }}
+              </div>
+              <button
+                class="bg-gray-600 text-white px-2 py-0 -mr-6 rounded-sm hidden group-hover:flex focus:outline-none"
+                @click="deleteCaption(i)"
+              >
+                x
+              </button>
             </div>
           </div>
         </div>
       </div>
+
       <!-- video section -->
       <div class="flex flex-col max-h-1/2" @keydown="keypress($event)">
         <div class="flex space-x-2 h-auto overflow-visible">
@@ -502,6 +516,17 @@ export default {
       // if (index < this.captions.captionGroups.length - 1)
       //   this.$refs['textarea-' + index][0].$el.focus()
     },
+    deleteCaption(index) {
+      if (this.captions.captionGroups.length != 1)
+        this.captions.captionGroups.splice(index, 1)
+      else
+        this.captions.captionGroups[index] = {
+          text: '',
+          placeholder: 'Start typing here...',
+          editTimestamp: { value: 0, string: '00:00:00' },
+          syncTimestamp: 0,
+        }
+    },
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
       var remainingSeconds = seconds % 60
@@ -578,5 +603,3 @@ export default {
   },
 }
 </script>
-
-<style></style>
