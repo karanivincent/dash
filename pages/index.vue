@@ -2,7 +2,7 @@
   <div class="bg-gray-800 h-screen pt-2 pb-12 grid grid-cols-5">
     <div class="col-span-1 col-start-1 text-center">
       <label
-        class="px-6 py-2 font-semibold text-gray-200 bg-purple-600 cursor-pointer hover:bg-purple-700 focus:outline-none rounded-md"
+        class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
       >
         <input
           type="file"
@@ -52,7 +52,7 @@
           <div class="flex flex-col items-center w-10 -ml-12 mt-5 gap-2">
             <!-- play button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
               @click="videoPlayPause"
             >
               <div v-if="videoMeta.paused === true">
@@ -86,7 +86,7 @@
             </button>
             <!-- rewind button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
               @click="seek('rewind')"
             >
               <svg
@@ -102,7 +102,7 @@
             </button>
             <!-- volume button -->
             <button
-              class="flex flex-col items-center px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              class="flex flex-col items-center px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
               @click="addVolume"
             >
               <svg
@@ -121,7 +121,7 @@
             </button>
             <!-- playback speed button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
               @click="setPlaybackspeed('fast')"
             >
               <svg
@@ -145,7 +145,7 @@
             </button>
             <!-- forward button -->
             <button
-              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
+              class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-blue-500 text-2xl font-semibold focus:outline-none"
               @click="seek('forward')"
             >
               <svg
