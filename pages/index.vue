@@ -36,8 +36,11 @@
               class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
               @keydown.native="keypress($event, i)"
             />
-            <div class="px-2 text-purple-700 text-opacity-75 font-medium">
-              00:01:23
+            <div
+              class="px-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
+              @click="seek('edit', group.editTimestamp.value)"
+            >
+              {{ group.editTimestamp.string }}
             </div>
           </div>
         </div>
@@ -52,7 +55,7 @@
               class="px-1 py-1 rounded-md bg-gray-600 text-white hover:text-orange-400 text-2xl font-semibold focus:outline-none"
               @click="videoPlayPause"
             >
-              <div v-if="videoPlayer.paused === true">
+              <div v-if="videoMeta.paused === true">
                 <svg
                   class="w-8 h-8"
                   fill="currentColor"
@@ -114,7 +117,7 @@
                   clip-rule="evenodd"
                 ></path>
               </svg>
-              <div class="h-4 text-xs font-thin">{{ videoPlayer.volume }}%</div>
+              <div class="h-4 text-xs font-thin">{{ videoMeta.volume }}%</div>
             </button>
             <!-- playback speed button -->
             <button
@@ -137,7 +140,7 @@
                 />
               </svg>
               <div class="h-4 text-xs font-thin">
-                {{ videoPlayer.playbackspeed }}%
+                {{ videoMeta.playbackspeed }}%
               </div>
             </button>
             <!-- forward button -->
@@ -163,7 +166,7 @@
             <div
               class="flex items-center bg-gray-600 text-center text-gray-300"
             >
-              <div class="w-16">{{ videoPlayer.currentTime }}</div>
+              <div class="w-16">{{ videoMeta.currentTime }}</div>
 
               <div class="h-7 py-auto flex-grow">
                 <vue-slider
@@ -171,18 +174,18 @@
                   v-model="slideValue"
                   :drag-on-click="true"
                   :lazy="true"
-                  :max="videoPlayer.duration"
+                  :max="videoMeta.duration"
                   :tooltip-formatter="(val) => timeFormat(val)"
                   @drag-start="videoPause"
                   @dragging="videoPause"
                   @drag-end="seek('slider')"
                 ></vue-slider>
               </div>
-              <div class="w-16">{{ videoPlayer.durationString }}</div>
+              <div class="w-16">{{ videoMeta.durationString }}</div>
             </div>
 
             <video
-              ref="videoplayer"
+              ref="videoMeta"
               controls
               controlsList="nodownload noremoteplayback"
               preload="metadata"
@@ -209,7 +212,7 @@ export default {
       slideValue: 0,
       slider: null,
       video: null,
-      videoPlayer: {
+      videoMeta: {
         paused: true,
         volume: 100,
         duration: 0,
@@ -222,27 +225,33 @@ export default {
         },
       },
       captions: {
-        captionGroups: [{ text: ' lorem', editTime: 1, syncTime: 0 }],
+        captionGroups: [
+          {
+            text: ' lorem',
+            editTimestamp: { value: 0, string: '00:00:00' },
+            syncTimestamp: 0,
+          },
+        ],
       },
     }
   },
   computed: {
     playerState() {
-      return this.$refs.videoplayer
+      return this.$refs.videoMeta
     },
   },
   mounted() {
     this.slider = this.$refs.slider
-    this.video = this.$refs.videoplayer
+    this.video = this.$refs.videoMeta
     // update slider index on video timeupdate
     this.video.addEventListener('timeupdate', () => {
       this.slider.setIndex(Math.trunc(this.video.currentTime))
     })
 
-    // set video duration on videoPlayer variable
+    // set video duration on videoMeta variable
     var setTime = (time) => {
-      this.videoPlayer.duration = Math.trunc(time)
-      this.videoPlayer.durationString = this.timeFormat(time)
+      this.videoMeta.duration = Math.trunc(time)
+      this.videoMeta.durationString = this.timeFormat(time)
     }
     this.video.onloadedmetadata = function () {
       setTime(this.duration)
@@ -253,7 +262,7 @@ export default {
       var file = event.target.files[0]
       if (file) {
         var type = file.type
-        var videoNode = this.$refs.videoplayer
+        var videoNode = this.$refs.videoMeta
         var canPlay = videoNode.canPlayType(type)
         canPlay === '' ? (canPlay = false) : (canPlay = true)
 
@@ -264,7 +273,7 @@ export default {
 
         var fileURL = URL.createObjectURL(file)
         videoNode.src = fileURL
-        this.videoPlayer.paused = true
+        this.videoMeta.paused = true
       }
     },
     getLineNumber(textarea) {
@@ -333,30 +342,30 @@ export default {
     videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
-        this.videoPlayer.paused = true
+        this.videoMeta.paused = true
       }
     },
     videoPlay() {
       if (this.video.paused === true) {
         this.video.play()
-        this.videoPlayer.paused = false
+        this.videoMeta.paused = false
       }
     },
-    seek(source) {
+    seek(source, time = 0) {
       switch (source) {
         case 'forward':
-          this.video.currentTime += this.videoPlayer.seekInterval.forward
+          this.video.currentTime += this.videoMeta.seekInterval.forward
 
           break
         case 'rewind':
-          this.video.currentTime -= this.videoPlayer.seekInterval.rewind
+          this.video.currentTime -= this.videoMeta.seekInterval.rewind
 
           break
         case 'slider':
           this.video.currentTime = this.slider.getIndex()
-          // this.video.onseeked = () => {
-          //   this.videoPlay()
-          // }
+          break
+        case 'edit':
+          this.video.currentTime = time
           break
       }
     },
@@ -443,7 +452,7 @@ export default {
           var currentText = text.substring(0, cursor_location)
           this.captions.captionGroups[i].text = currentText
           var createdText = text.substring(cursor_location, selection_end)
-          this.insertCaption(i, createdText)
+          this.insertCaption(i, createdText, this.video.currentTime)
           break
         case 'Tab':
           event.preventDefault()
@@ -456,16 +465,22 @@ export default {
       }
     },
 
-    insertCaption(index, text) {
-      // get current caption cursor position
+    insertCaption(index, text, time) {
+      var roundedTime = Math.round((time + Number.EPSILON) * 100) / 100
 
-      //  get current caption length
-      // select text between cursor and end
+      var formatTime = (seconds) => {
+        var splitArray = seconds.toString().split('.')
+        var wholePart = this.timeFormat(splitArray[0])
+        var decimalPart = splitArray[1]
+
+        return wholePart + '.' + decimalPart
+      }
+      var timeString = formatTime(roundedTime.toFixed(2))
       index = index + 1
       this.captions.captionGroups.splice(index, 0, {
         text: text,
-        editTime: 0,
-        syncTime: 0,
+        editTimestamp: { value: time, string: timeString },
+        syncTimestamp: 0,
       })
 
       this.$nextTick(() => {
@@ -507,7 +522,7 @@ export default {
           ('00' + minutes).slice(-2) + ':' + ('00' + remainingSeconds).slice(-2)
       }
 
-      this.videoPlayer.currentTime = formatedTime
+      this.videoMeta.currentTime = formatedTime
 
       return formatedTime
     },
@@ -518,33 +533,33 @@ export default {
         this.videoPlay.paused = false
       } else {
         this.videoPause()
-        this.videoPlayer.paused = true
+        this.videoMeta.paused = true
       }
     },
     addVolume() {
-      if (this.videoPlayer.volume < 100) this.videoPlayer.volume += 5
+      if (this.videoMeta.volume < 100) this.videoMeta.volume += 5
 
-      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
+      this.$refs.videoMeta.volume = this.videoMeta.volume / 100
     },
     reduceVolume() {
-      if (this.videoPlayer.volume > 0) this.videoPlayer.volume -= 5
+      if (this.videoMeta.volume > 0) this.videoMeta.volume -= 5
 
-      this.$refs.videoplayer.volume = this.videoPlayer.volume / 100
+      this.$refs.videoMeta.volume = this.videoMeta.volume / 100
     },
     setPlaybackspeed(speed) {
       switch (speed) {
         case 'fast':
-          if (this.videoPlayer.playbackspeed < 200) {
-            this.videoPlayer.playbackspeed += 10
-            this.$refs.videoplayer.playbackRate =
-              this.videoPlayer.playbackspeed / 100
+          if (this.videoMeta.playbackspeed < 200) {
+            this.videoMeta.playbackspeed += 10
+            this.$refs.videoMeta.playbackRate =
+              this.videoMeta.playbackspeed / 100
           }
           break
         case 'slow':
-          if (this.videoPlayer.playbackspeed > 0) {
-            this.videoPlayer.playbackspeed -= 10
-            this.$refs.videoplayer.playbackRate =
-              this.videoPlayer.playbackspeed / 100
+          if (this.videoMeta.playbackspeed > 0) {
+            this.videoMeta.playbackspeed -= 10
+            this.$refs.videoMeta.playbackRate =
+              this.videoMeta.playbackspeed / 100
           }
           break
       }
