@@ -18,18 +18,29 @@
       <div
         class="flex flex-col overflow-y-auto h-full min-h-32 bg-gray-300 border-b-8"
       >
-        <textarea-autosize
+        <div
           v-for="(group, i) in captions.captionGroups"
-          :id="`textarea-${i}`"
           :key="i"
-          :ref="`textarea-${i}`"
-          v-model="group.text"
-          :min-height="30"
-          rows="1"
-          cols="20"
-          class="flex-none h-full text-gray-800 border-b border-orange-300 font-semibold leading-loose text-lg outline-none px-2 py-1 bg-transparent focus:bg-white"
-          @keydown.native="keypress($event, i)"
-        />
+          class="flex-none border-b border-orange-300"
+        >
+          <div
+            class="flex items-center bg-transparent focus-within:bg-gray-100"
+          >
+            <textarea-autosize
+              :id="`textarea-${i}`"
+              :ref="`textarea-${i}`"
+              v-model="group.text"
+              :min-height="30"
+              rows="1"
+              cols="20"
+              class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
+              @keydown.native="keypress($event, i)"
+            />
+            <div class="px-2 text-purple-700 text-opacity-75 font-medium">
+              00:01:23
+            </div>
+          </div>
+        </div>
       </div>
       <!-- video section -->
       <div class="flex flex-col max-h-1/2" @keydown="keypress($event)">
