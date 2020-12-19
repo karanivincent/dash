@@ -726,7 +726,6 @@ module.exports = {
     },
   },
   variants: {
-
     accessibility: ['responsive', 'focus'],
     alignContent: ['responsive'],
     alignItems: ['responsive'],
