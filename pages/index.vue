@@ -25,6 +25,13 @@
         >
           <div
             class="flex items-center bg-transparent focus-within:bg-gray-100"
+            :class="{
+              'focus-within:bg-green-200':
+                group.text.length >= 29 && group.text.length < 48,
+              'focus-within:bg-orange-200':
+                group.text.length >= 48 && group.text.length <= 60,
+              'focus-within:bg-red-200': group.text.length > 60,
+            }"
           >
             <textarea-autosize
               :id="`textarea-${i}`"
@@ -33,9 +40,12 @@
               :min-height="30"
               rows="1"
               cols="20"
+              :placeholder="group.placeholder"
               class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
               @keydown.native="keypress($event, i)"
             />
+            <!-- - last mother's day erica didn't get me a mother'  29 48-->
+
             <div
               class="px-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
               @click="seek('edit', group.editTimestamp.value)"
@@ -227,7 +237,8 @@ export default {
       captions: {
         captionGroups: [
           {
-            text: ' lorem',
+            text: '',
+            placeholder: 'Start typing here...',
             editTimestamp: { value: 0, string: '00:00:00' },
             syncTimestamp: 0,
           },
