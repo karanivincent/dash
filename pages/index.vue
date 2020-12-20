@@ -21,9 +21,9 @@ div.test {
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <!-- text section -->
-      <div class="overflow-y-scroll h-full min-h-32 -mr-10">
+      <div class="overflow-y-scroll h-full min-h-32 -mr-12">
         <div
-          class="flex flex-col h-auto min-h-full border-b-8 bg-gray-300 mr-6"
+          class="flex flex-col h-auto min-h-full border-b-8 bg-gray-300 mr-8"
         >
           <div
             v-for="(group, i) in captions.captionGroups"
@@ -31,7 +31,7 @@ div.test {
             class="flex-none border-b border-orange-300"
           >
             <div
-              class="group flex items-center bg-transparent focus-within:bg-gray-100"
+              class="group flex bg-transparent focus-within:bg-gray-100"
               :class="{
                 'focus-within:bg-green-200':
                   group.text.length >= 29 && group.text.length < 48,
@@ -53,13 +53,13 @@ div.test {
               />
 
               <div
-                class="px-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
+                class="flex items-center pr-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
                 @click="seek('edit', group.editTimestamp.value)"
               >
                 {{ group.editTimestamp.string }}
               </div>
               <button
-                class="bg-gray-600 text-white px-2 py-0 -mr-6 rounded-sm hidden group-hover:flex focus:outline-none"
+                class="bg-orange-500 text-white px-3 -mr-8 rounded-sm hidden group-hover:inline-block focus:outline-none"
                 @click="deleteCaption(i)"
               >
                 x
@@ -512,20 +512,18 @@ export default {
         var elem = this.$refs[`textarea-${index}`][0]
         this.setCaretPosition(elem, 0)
       })
-
-      // if (index < this.captions.captionGroups.length - 1)
-      //   this.$refs['textarea-' + index][0].$el.focus()
     },
     deleteCaption(index) {
       if (this.captions.captionGroups.length != 1)
         this.captions.captionGroups.splice(index, 1)
-      else
-        this.captions.captionGroups[index] = {
-          text: '',
-          placeholder: 'Start typing here...',
-          editTimestamp: { value: 0, string: '00:00:00' },
-          syncTimestamp: 0,
+      else {
+        this.captions.captionGroups[index].text = ''
+        this.captions.captionGroups[index].editTimestamp = {
+          value: 0,
+          string: '00:00:00',
         }
+        this.captions.captionGroups[index].syncTimestamp = 0
+      }
     },
     timeFormat(seconds) {
       var minutes = Math.floor(seconds / 60)
