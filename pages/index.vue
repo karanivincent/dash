@@ -33,11 +33,11 @@ div.test {
             <div
               class="group flex bg-transparent focus-within:bg-gray-100"
               :class="{
-                'focus-within:bg-green-200':
-                  group.text.length >= 29 && group.text.length < 48,
-                'focus-within:bg-orange-200':
-                  group.text.length >= 48 && group.text.length <= 60,
-                'focus-within:bg-red-200': group.text.length > 60,
+                'focus-within:bg-green-300':
+                  group.text.length >= 20 && group.text.length < 40,
+                'focus-within:bg-orange-300':
+                  group.text.length >= 40 && group.text.length <= 60,
+                'focus-within:bg-red-300 bg-red-300': group.text.length > 60,
               }"
             >
               <textarea-autosize
