@@ -50,6 +50,7 @@ div.test {
                 :placeholder="group.placeholder"
                 class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
                 @keydown.native="keypress($event, i)"
+                @paste.native="onPaste($event, i)"
               />
 
               <div
@@ -478,11 +479,70 @@ export default {
           break
       }
     },
+    onPaste(event, index) {
+      let pasteData = event.clipboardData.getData('text')
+      let pasteArray = pasteData.split(/[\r\n]+/)
+      let pasteTime = this.captions.captionGroups[index].editTimestamp
+      console.log('Length:', pasteArray.length)
+
+      if (pasteArray.length > 1) {
+        // performance testing
+        // var t0 = performance.now()
+
+        var cursor_location = event.target.selectionEnd
+        var selection_end = event.target.value.length
+        var text = event.target.value
+        var startText = text.substring(0, cursor_location)
+        var endText = text.substring(cursor_location, selection_end)
+
+        for (let i = 0; i < pasteArray.length; i++) {
+          if (i == 0) {
+            this.captions.captionGroups[index].text = startText + pasteArray[i]
+          } else if (i == pasteArray.length - 1) {
+            let text = pasteArray[i].trim()
+
+            if (text != '') {
+              this.captions.captionGroups.splice(index, 0, {
+                text: text + ' ' + endText,
+                editTimestamp: pasteTime,
+                syncTimestamp: 0,
+              })
+            }
+          } else {
+            let text = pasteArray[i].trim()
+            if (text != '') {
+              this.captions.captionGroups.splice(index, 0, {
+                text: text + ' ',
+                editTimestamp: pasteTime,
+                syncTimestamp: 0,
+              })
+            }
+          }
+          index++
+        }
+        event.preventDefault()
+
+        // performance testing
+        // this.$nextTick(() => {
+        //   var t3 = performance.now()
+        //   var seconds = (t3 - t0) / 1000
+        //   console.log('Next tick')
+        //   console.log('Seconds:', seconds)
+        //   console.log('Milliseconds: ', t3 - t0)
+        // })
+        // var t1 = performance.now()
+        // var seconds = (t1 - t0) / 1000
+        // console.log('Javascript')
+        // console.log('Seconds:', seconds)
+        // console.log('Milliseconds: ', t1 - t0)
+        return
+      }
+    },
     keypress(event, i = -1) {
       switch (event.key) {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
-            var elem = this.$refs[`textarea-${i - 1}`][0]
+            let elem = this.$refs[`textarea-${i - 1}`][0]
             event.preventDefault()
 
             this.setCaretPosition(elem, event.target.selectionEnd)
@@ -493,7 +553,7 @@ export default {
             i < this.captions.captionGroups.length - 1 &&
             event.target.selectionEnd === event.target.value.length
           ) {
-            elem = this.$refs[`textarea-${i + 1}`][0]
+            let elem = this.$refs[`textarea-${i + 1}`][0]
 
             event.preventDefault()
 
@@ -502,7 +562,7 @@ export default {
           break
         case 'ArrowLeft':
           if (i != 0 && event.target.selectionEnd === 0) {
-            elem = this.$refs[`textarea-${i - 1}`][0]
+            let elem = this.$refs[`textarea-${i - 1}`][0]
             event.preventDefault()
 
             this.setCaretPosition(elem, elem.value.length)
@@ -513,7 +573,7 @@ export default {
             i < this.captions.captionGroups.length - 1 &&
             event.target.selectionEnd === event.target.value.length
           ) {
-            elem = this.$refs[`textarea-${i + 1}`][0]
+            let elem = this.$refs[`textarea-${i + 1}`][0]
             event.preventDefault()
 
             this.setCaretPosition(elem, 0)
@@ -530,7 +590,7 @@ export default {
             currentCaption.text += nextCaption.text
 
             this.captions.captionGroups.splice(i + 1, 1)
-            elem = this.$refs[`textarea-${i}`][0]
+            let elem = this.$refs[`textarea-${i}`][0]
             const set_cursor = elem.value.length
             this.$nextTick(() => {
               this.setCaretPosition(elem, set_cursor)
@@ -545,7 +605,7 @@ export default {
             this.captions.captionGroups[i - 1].text =
               precedingCaption.text + currentCaption.text
             this.captions.captionGroups.splice(i, 1)
-            elem = this.$refs[`textarea-${i - 1}`][0]
+            let elem = this.$refs[`textarea-${i - 1}`][0]
             const set_cursor = elem.value.length
             this.$nextTick(() => {
               this.setCaretPosition(elem, set_cursor)
@@ -558,10 +618,10 @@ export default {
           var selection_end = event.target.value.length
           // select text
           var text = event.target.value
-          var currentText = text.substring(0, cursor_location)
-          this.captions.captionGroups[i].text = currentText
-          var createdText = text.substring(cursor_location, selection_end)
-          this.insertCaption(i, createdText, this.video.currentTime)
+          var startText = text.substring(0, cursor_location)
+          this.captions.captionGroups[i].text = startText
+          var endText = text.substring(cursor_location, selection_end)
+          this.insertCaption(i, endText, this.video.currentTime)
           break
         case 'Tab':
           event.preventDefault()
@@ -593,7 +653,7 @@ export default {
       })
 
       this.$nextTick(() => {
-        var elem = this.$refs[`textarea-${index}`][0]
+        let elem = this.$refs[`textarea-${index}`][0]
         this.setCaretPosition(elem, 0)
       })
     },
