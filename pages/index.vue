@@ -698,9 +698,14 @@ export default {
                 let elem = this.$refs[`textarea-${index}`][0]
                 selectedText += elem.value + '\n'
               }
-              this.copyToClipboard(selectedText)
-              console.log(selectedText)
             }
+            if (this.view.select.direction === 'up') {
+              for (let index = select.end; index <= select.start; index++) {
+                let elem = this.$refs[`textarea-${index}`][0]
+                selectedText += elem.value + '\n'
+              }
+            }
+            this.copyToClipboard(selectedText)
             // copy selection
           }
       }
