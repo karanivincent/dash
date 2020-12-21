@@ -40,7 +40,17 @@ div.test {
                 'focus-within:bg-red-300 bg-red-300': group.text.length > 60,
               }"
             >
-              <textarea-autosize
+              <div
+                contenteditable="true"
+                :id="`textarea-${i}`"
+                :ref="`textarea-${i}`"
+                class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
+                @keydown="keypress($event, i)"
+                @paste="onPaste($event, i)"
+              >
+                Kuna kitu hapa
+              </div>
+              <!-- <textarea-autosize
                 :id="`textarea-${i}`"
                 :ref="`textarea-${i}`"
                 v-model="group.text"
@@ -51,7 +61,7 @@ div.test {
                 class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
                 @keydown.native="keypress($event, i)"
                 @paste.native="onPaste($event, i)"
-              />
+              /> -->
 
               <div
                 class="flex items-center pr-2 text-purple-700 text-opacity-75 font-medium cursor-pointer"
@@ -434,21 +444,6 @@ export default {
       return result
     },
 
-    setCaretPosition(elem, caretPos) {
-      if (elem != null) {
-        if (elem.$el.createTextRange) {
-          var range = elem.$el.createTextRange()
-          range.move('character', caretPos)
-          range.select()
-        } else {
-          if (elem.$el.selectionStart) {
-            elem.$el.focus()
-            elem.$el.setSelectionRange(caretPos, caretPos)
-          } else elem.$el.focus()
-        }
-      }
-    },
-
     videoPause() {
       if (this.video.paused === false) {
         this.video.pause()
@@ -539,6 +534,7 @@ export default {
       }
     },
     keypress(event, i = -1) {
+      console.log(event)
       switch (event.key) {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
@@ -606,7 +602,7 @@ export default {
               precedingCaption.text + currentCaption.text
             this.captions.captionGroups.splice(i, 1)
             let elem = this.$refs[`textarea-${i - 1}`][0]
-            const set_cursor = elem.value.length
+            const set_cursor = elem.innerText.length
             this.$nextTick(() => {
               this.setCaretPosition(elem, set_cursor)
             })
@@ -614,10 +610,13 @@ export default {
           break
         case 'Enter':
           event.preventDefault()
+          var text = event.target.innerText // using innerText here because it preserves newlines
+          // if (text[text.length - 1] === '\n') text = text.slice(0, -1)
+          // console.log(text)
           var cursor_location = event.target.selectionEnd
-          var selection_end = event.target.value.length
-          // select text
-          var text = event.target.value
+          var selection_end = text.length
+          // // select text
+          // var text = event.target.value
           var startText = text.substring(0, cursor_location)
           this.captions.captionGroups[i].text = startText
           var endText = text.substring(cursor_location, selection_end)
@@ -633,7 +632,20 @@ export default {
           }
       }
     },
-
+    setCaretPosition(elem, caretPos) {
+      if (elem != null) {
+        if (elem.createTextRange) {
+          var range = elem.createTextRange()
+          range.move('character', caretPos)
+          range.select()
+        } else {
+          if (elem.selectionStart) {
+            elem.focus()
+            elem.setSelectionRange(caretPos, caretPos)
+          } else elem.focus()
+        }
+      }
+    },
     insertCaption(index, text, time) {
       var roundedTime = Math.round((time + Number.EPSILON) * 100) / 100
 
