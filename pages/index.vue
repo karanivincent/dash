@@ -596,6 +596,7 @@ export default {
       }
     },
     keypress(event, i = -1) {
+      console.log(event.key)
       switch (event.key) {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
@@ -675,8 +676,10 @@ export default {
           var selection_end = event.target.value.length
           // select text
           var text = event.target.value
-          var startText = text.substring(0, cursor_location)
-          this.captions.captionGroups[i].text = startText
+          var startText = text.substring(0, cursor_location).trim()
+          var sentenceEnd = startText.search(/[?.!]$/)
+          sentenceEnd == -1 ? (sentenceEnd = false) : (sentenceEnd = true)
+          this.captions.captionGroups[i].text = startText + ' '
           var endText = text.substring(cursor_location, selection_end)
           this.insertCaption(i, endText, this.video.currentTime)
           break
@@ -686,6 +689,29 @@ export default {
             this.seek('rewind')
           } else {
             this.videoPlayPause()
+          }
+          break
+        case ' ':
+          console.log('niko kwa space')
+          if (i != 0) {
+            var elem = this.$refs[`textarea-${i - 1}`][0]
+            var sentenceStart = elem.value.search(/[?.!] $/)
+            sentenceStart == -1
+              ? (sentenceStart = false)
+              : (sentenceStart = true)
+            if (sentenceStart) {
+              var originalValue = event.target.value
+              var finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
+                letter.toUpperCase()
+              )
+              event.target.value = finalValue
+            }
+          } else {
+            originalValue = event.target.value
+            finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
+              letter.toUpperCase()
+            )
+            event.target.value = finalValue
           }
           break
         case 'c':
