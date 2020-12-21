@@ -31,7 +31,7 @@ div.test {
             class="flex-none border-b border-orange-300"
           >
             <div
-              class="group flex bg-transparent focus-within:bg-gray-100"
+              class="group flex bg-transparent text-gray-800 focus-within:bg-gray-100"
               :class="{
                 'focus-within:bg-green-300':
                   group.text.length >= 20 && group.text.length < 40,
@@ -48,9 +48,19 @@ div.test {
                 rows="1"
                 cols="20"
                 :placeholder="group.placeholder"
-                class="flex-grow h-full text-gray-800 bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
-                @keydown.native="keypress($event, i)"
+                class="flex-grow inline h-full bg-transparent font-semibold leading-loose text-lg outline-none px-2 py-1"
+                :class="{
+                  'bg-blue-600 text-white':
+                    view.select.active &&
+                    i >= view.select.start &&
+                    i <= view.select.end,
+                }"
+                @dblclick.native="view.select.end++"
                 @paste.native="onPaste($event, i)"
+                @keydown.native="keypress($event, i)"
+                @mousedown.native="onMousedown($event, i)"
+                @mouseover.native="onMouseover($event, i)"
+                @mouseup.native="onMouseup($event, i)"
               />
 
               <div
@@ -316,6 +326,22 @@ export default {
       view: {
         volumeSlider: false,
         speedSlider: false,
+        select: {
+          active: false,
+          start: -1,
+          end: -1,
+          direction: 'down',
+          mousedown: {
+            index: 0,
+            active: false,
+          },
+          mouseover: {
+            index: 0,
+          },
+          mouseup: {
+            index: 0,
+          },
+        },
       },
       buffer: null,
       slideValue: 0,
@@ -368,6 +394,37 @@ export default {
     }
   },
   methods: {
+    onMousedown(event, index) {
+      this.view.select.mousedown.index = index
+      this.view.select.mousedown.active = true
+    },
+    onMouseup(event, index) {
+      if (this.view.select.mousedown.index == index) {
+        this.view.select.active = false
+        this.view.select.start = -1
+        this.view.select.end = -1
+      }
+      this.view.select.mousedown.index = index
+      this.view.select.mousedown.active = false
+    },
+    onMouseover(event, index) {
+      console.log(event)
+      if (this.view.select.mousedown.active == true) {
+        if (index > this.view.select.mousedown.index) {
+          this.view.select.active = true
+          this.view.select.start = this.view.select.mousedown.index
+          this.view.select.end = index
+          this.view.select.direction = 'down'
+        } else {
+          this.view.select.active = true
+          this.view.select.start = index
+          this.view.select.end = this.view.select.mousedown.index
+          this.view.select.direction = 'up'
+        }
+        event.target.classList.add('bg-blue-600', 'text-gray-100')
+      }
+      event.preventDefault()
+    },
     playSelectedvideo(event) {
       var file = event.target.files[0]
       if (file) {
@@ -626,10 +683,24 @@ export default {
         case 'Tab':
           event.preventDefault()
           if (event.shiftKey) {
-            event.preventDefault()
             this.seek('rewind')
           } else {
             this.videoPlayPause()
+          }
+          break
+        case 'c':
+          if (event.ctrlKey && this.view.select.active) {
+            event.preventDefault()
+            let select = this.view.select
+            let selectedText = ''
+            if (this.view.select.direction === 'down') {
+              for (let index = select.start; index <= select.end; index++) {
+                let elem = this.$refs[`textarea-${index}`][0]
+                selectedText += elem.value + '\n'
+              }
+              console.log(selectedText)
+            }
+            // copy selection
           }
       }
     },
