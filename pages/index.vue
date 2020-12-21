@@ -692,27 +692,14 @@ export default {
           }
           break
         case ' ':
-          console.log('niko kwa space')
-          if (i != 0) {
-            var elem = this.$refs[`textarea-${i - 1}`][0]
-            var sentenceStart = elem.value.search(/[?.!] $/)
-            sentenceStart == -1
-              ? (sentenceStart = false)
-              : (sentenceStart = true)
-            if (sentenceStart) {
-              var originalValue = event.target.value
-              var finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
-                letter.toUpperCase()
-              )
-              event.target.value = finalValue
-            }
-          } else {
-            originalValue = event.target.value
-            finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
-              letter.toUpperCase()
-            )
-            event.target.value = finalValue
-          }
+          // capitalize first letter
+          this.firstLettercaps(i)
+          var originalValue = event.target.value
+          var finalValue = originalValue.replace(/(\bi\b)/g, (letter) =>
+            letter.toUpperCase()
+          )
+          event.target.value = finalValue
+
           break
         case 'c':
           if (event.ctrlKey && this.view.select.active) {
@@ -734,6 +721,26 @@ export default {
             this.copyToClipboard(selectedText)
             // copy selection
           }
+      }
+    },
+    firstLettercaps(i) {
+      if (i != 0) {
+        var elem = this.$refs[`textarea-${i - 1}`][0]
+        var sentenceStart = elem.value.search(/[?.!] $/)
+        sentenceStart == -1 ? (sentenceStart = false) : (sentenceStart = true)
+        if (sentenceStart) {
+          var originalValue = event.target.value
+          var finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
+            letter.toUpperCase()
+          )
+          event.target.value = finalValue
+        }
+      } else {
+        originalValue = event.target.value
+        finalValue = originalValue.replace(/(^\w{1})/g, (letter) =>
+          letter.toUpperCase()
+        )
+        event.target.value = finalValue
       }
     },
     copyToClipboard(text) {
