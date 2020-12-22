@@ -596,9 +596,10 @@ export default {
       }
     },
     keypress(event, i = -1) {
-      console.log(event.key)
-      switch (event.key) {
-        case 'ArrowUp':
+      console.log(event)
+      switch (event.keyCode) {
+        case 38:
+          // Arrow up
           if (i != 0 && event.target.selectionEnd === 0) {
             let elem = this.$refs[`textarea-${i - 1}`][0]
             event.preventDefault()
@@ -606,7 +607,9 @@ export default {
             this.setCaretPosition(elem, event.target.selectionEnd)
           }
           break
-        case 'ArrowDown':
+
+        case 40:
+          // Arrow down
           if (
             i < this.captions.captionGroups.length - 1 &&
             event.target.selectionEnd === event.target.value.length
@@ -618,7 +621,8 @@ export default {
             this.setCaretPosition(elem, 0)
           }
           break
-        case 'ArrowLeft':
+        case 37:
+          // Arrow left
           if (i != 0 && event.target.selectionEnd === 0) {
             let elem = this.$refs[`textarea-${i - 1}`][0]
             event.preventDefault()
@@ -626,7 +630,8 @@ export default {
             this.setCaretPosition(elem, elem.value.length)
           }
           break
-        case 'ArrowRight':
+        case 39:
+          // Arrow right
           if (
             i < this.captions.captionGroups.length - 1 &&
             event.target.selectionEnd === event.target.value.length
@@ -637,7 +642,8 @@ export default {
             this.setCaretPosition(elem, 0)
           }
           break
-        case 'Delete':
+        case 46:
+          // Delete
           if (
             i < this.captions.captionGroups.length - 1 &&
             event.target.selectionEnd === event.target.value.length
@@ -655,7 +661,8 @@ export default {
             })
           }
           break
-        case 'Backspace':
+        case 8:
+          // Backspace
           if (i != 0 && event.target.selectionEnd === 0) {
             event.preventDefault()
             const precedingCaption = this.captions.captionGroups[i - 1]
@@ -670,7 +677,8 @@ export default {
             })
           }
           break
-        case 'Enter':
+        case 13:
+          // Enter
           event.preventDefault()
           var cursor_location = event.target.selectionEnd
           var selection_end = event.target.value.length
@@ -683,7 +691,8 @@ export default {
           var endText = text.substring(cursor_location, selection_end)
           this.insertCaption(i, endText, this.video.currentTime)
           break
-        case 'Tab':
+        case 9:
+          // Tab
           event.preventDefault()
           if (event.shiftKey) {
             this.seek('rewind')
@@ -691,7 +700,8 @@ export default {
             this.videoPlayPause()
           }
           break
-        case ' ':
+        case 32:
+          // Space
           // capitalize first letter
           this.firstLettercaps(i)
           var originalValue = event.target.value
@@ -701,7 +711,8 @@ export default {
           event.target.value = finalValue
 
           break
-        case 'c':
+        case 67:
+          // Character C
           if (event.ctrlKey && this.view.select.active) {
             event.preventDefault()
             let select = this.view.select
