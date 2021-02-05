@@ -24,6 +24,12 @@ div.test {
       >
         CLEAR ALL
       </button>
+      <button
+        class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
+        @click="selectAll()"
+      >
+        SELECT ALL
+      </button>
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <!-- text section -->
@@ -415,6 +421,12 @@ export default {
           syncTimestamp: 0,
         },
       ]
+    },
+    selectAll() {
+      this.view.select.active = true
+      this.view.select.start = 0
+      this.view.select.end = this.captions.captionGroups.length - 1
+      this.view.select.direction = 'down'
     },
     onMousedown(event, index) {
       this.view.select.mousedown.index = index
