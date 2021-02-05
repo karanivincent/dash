@@ -690,18 +690,41 @@ export default {
           }
           break
         case 'Backspace':
-          if (i != 0 && event.target.selectionEnd === 0) {
+          if (this.view.select.active) {
             event.preventDefault()
-            const precedingCaption = this.captions.captionGroups[i - 1]
-            const currentCaption = this.captions.captionGroups[i]
-            this.captions.captionGroups[i - 1].text =
-              precedingCaption.text + currentCaption.text
-            this.captions.captionGroups.splice(i, 1)
-            let elem = this.$refs[`textarea-${i - 1}`][0]
-            const set_cursor = elem.value.length
-            this.$nextTick(() => {
-              this.setCaretPosition(elem, set_cursor)
-            })
+
+            let captions = this.view.select.end + 1 - this.view.select.start
+            if (captions < 0) {
+              this.captions.captionGroups.splice(
+                this.view.select.end,
+                Math.abs(captions)
+              )
+            } else {
+              console.log(
+                'start ' + this.view.select.start,
+                'end ' + this.view.select.end,
+                'captions ' + captions
+              )
+              this.captions.captionGroups.splice(
+                this.view.select.start,
+                captions
+              )
+            }
+            this.view.select.active = false
+          } else {
+            if (i != 0 && event.target.selectionEnd === 0) {
+              event.preventDefault()
+              const precedingCaption = this.captions.captionGroups[i - 1]
+              const currentCaption = this.captions.captionGroups[i]
+              this.captions.captionGroups[i - 1].text =
+                precedingCaption.text + currentCaption.text
+              this.captions.captionGroups.splice(i, 1)
+              let elem = this.$refs[`textarea-${i - 1}`][0]
+              const set_cursor = elem.value.length
+              this.$nextTick(() => {
+                this.setCaretPosition(elem, set_cursor)
+              })
+            }
           }
           break
         case 'Enter':
@@ -736,25 +759,32 @@ export default {
 
           break
         case 'c':
-          if (event.ctrlKey && this.view.select.active) {
+          if (event.ctrlKey) {
             event.preventDefault()
-            let select = this.view.select
-            let selectedText = ''
-            if (this.view.select.direction === 'down') {
-              for (let index = select.start; index <= select.end; index++) {
-                let elem = this.$refs[`textarea-${index}`][0]
-                selectedText += elem.value + '\n'
-              }
-            }
-            if (this.view.select.direction === 'up') {
-              for (let index = select.end; index <= select.start; index++) {
-                let elem = this.$refs[`textarea-${index}`][0]
-                selectedText += elem.value + '\n'
-              }
-            }
+            let selectedText = this.getSelection()
             this.copyToClipboard(selectedText)
-            // copy selection
           }
+      }
+    },
+    getSelection() {
+      if (this.view.select.active) {
+        let select = this.view.select
+        let selectedText = ''
+        if (this.view.select.direction === 'down') {
+          for (let index = select.start; index <= select.end; index++) {
+            let elem = this.$refs[`textarea-${index}`][0]
+            selectedText += elem.value + '\n'
+          }
+        }
+        if (this.view.select.direction === 'up') {
+          for (let index = select.end; index <= select.start; index++) {
+            let elem = this.$refs[`textarea-${index}`][0]
+            selectedText += elem.value + '\n'
+          }
+        }
+        return selectedText
+      } else {
+        return ''
       }
     },
     firstLettercaps(i) {
