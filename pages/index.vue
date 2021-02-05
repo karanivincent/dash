@@ -6,7 +6,7 @@ div.test {
 
 <template>
   <div class="bg-gray-800 h-screen pt-2 pb-12 grid grid-cols-5">
-    <div class="col-span-1 col-start-1 text-center">
+    <div class="flex flex-col gap-4 col-span-1 col-start-1 text-center px-8">
       <label
         class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
       >
@@ -16,8 +16,14 @@ div.test {
           class="hidden"
           @change="playSelectedvideo"
         />
-        Upload
+        UPLOAD
       </label>
+      <button
+        class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
+        @click="clearAll()"
+      >
+        CLEAR ALL
+      </button>
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <!-- text section -->
@@ -315,6 +321,12 @@ div.test {
         </div>
       </div>
     </div>
+    <div class="col-span-1 text-center">
+      <div class="font-medium text-base text-white">
+        <span>Captions</span>
+        <span>{{ captions.captionGroups.length }}</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -394,6 +406,16 @@ export default {
     }
   },
   methods: {
+    clearAll() {
+      this.captions.captionGroups = [
+        {
+          text: '',
+          placeholder: 'Start typing here...',
+          editTimestamp: { value: 0, string: '00:00:00' },
+          syncTimestamp: 0,
+        },
+      ]
+    },
     onMousedown(event, index) {
       this.view.select.mousedown.index = index
       this.view.select.mousedown.active = true
