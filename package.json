@@ -15,6 +15,7 @@
     "core-js": "^3.6.5",
     "nuxt": "^2.14.6",
     "tailwindcss-question-mark": "^0.1.0",
+    "v-tooltip": "^3.0.0-alpha.21",
     "vue-slider-component": "^3.2.11",
     "vue-textarea-autosize": "^1.1.1"
   },

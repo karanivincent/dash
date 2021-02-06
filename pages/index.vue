@@ -18,10 +18,43 @@ div.test {
         />
         UPLOAD
       </label>
+      <VDropdown :offset="[0, 16]" :triggers="['hover', 'focus']">
+        <!-- This will be the popover reference (for the events and position) -->
+        <button>Click me</button>
+
+        <!-- This will be the content of the popover -->
+        <template #popper>
+          <div class="flex gap-2">
+            <button
+              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
+            >
+              Copy
+            </button>
+            <button
+              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
+            >
+              Paste
+            </button>
+            <button
+              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
+            >
+              Paste
+            </button>
+            <button
+              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
+            >
+              Paste
+            </button>
+          </div>
+
+          <!-- You can put other components too -->
+        </template>
+      </VDropdown>
       <button
         class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
-        @click="clearAll()"
+        @click="view.showPopover = !view.showPopover"
       >
+        <!-- @click="clearAll()" -->
         CLEAR ALL
       </button>
       <button
@@ -33,6 +66,7 @@ div.test {
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
       <!-- text section -->
+
       <div class="overflow-y-scroll h-full min-h-32 -mr-12">
         <div
           class="flex flex-col h-auto min-h-full border-b-8 bg-gray-300 mr-8"
@@ -344,6 +378,7 @@ export default {
       view: {
         volumeSlider: false,
         speedSlider: false,
+        showPopover: false,
         select: {
           active: false,
           start: -1,
