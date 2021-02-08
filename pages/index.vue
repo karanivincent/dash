@@ -1,6 +1,10 @@
 <style>
-div.test {
-  overflow-y: scroll;
+.v-popper__inner {
+  background: green;
+  color: black;
+  padding: 0px;
+  border-radius: 5px;
+  box-shadow: 0 5px 30px rgba(black, 0.1);
 }
 </style>
 
@@ -18,43 +22,11 @@ div.test {
         />
         UPLOAD
       </label>
-      <VDropdown :offset="[0, 16]" :triggers="['hover', 'focus']">
-        <!-- This will be the popover reference (for the events and position) -->
-        <button>Click me</button>
 
-        <!-- This will be the content of the popover -->
-        <template #popper>
-          <div class="flex gap-2">
-            <button
-              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
-            >
-              Copy
-            </button>
-            <button
-              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
-            >
-              Paste
-            </button>
-            <button
-              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
-            >
-              Paste
-            </button>
-            <button
-              class="bg-blue-500 font-semibold uppercase text-gray-100 px-2 py-1 rounded-md"
-            >
-              Paste
-            </button>
-          </div>
-
-          <!-- You can put other components too -->
-        </template>
-      </VDropdown>
       <button
         class="px-6 py-2 font-semibold text-gray-200 bg-blue-600 cursor-pointer hover:bg-blue-700 focus:outline-none rounded-md"
-        @click="view.showPopover = !view.showPopover"
+        @click="clearAll()"
       >
-        <!-- @click="clearAll()" -->
         CLEAR ALL
       </button>
       <button
@@ -65,6 +37,87 @@ div.test {
       </button>
     </div>
     <div class="flex flex-col h-screen justify-end col-span-3 col-start-2">
+      <div class="bg-yellow-500 flex justify-center">
+        <VDropdown
+          :offset="[0, 16]"
+          :triggers="[]"
+          :shown="popOverActive"
+          :auto-hide="false"
+        >
+          <!-- This will be the popover reference (for the events and position) -->
+          <button hidden class="bg-red-500 mx-auto">
+            Button to display popover
+          </button>
+
+          <!-- This will be the content of the popover -->
+          <template #popper>
+            <div class="flex gap-2">
+              <button
+                name="copy"
+                class="font-semibold uppercase text-blue-500 px-2 py-1 rounded-md"
+                @click="popperCopy"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                name="cut"
+                class="font-semibold uppercase text-blue-500 px-2 py-1 rounded-md"
+                @click="popperCut"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                name="cut"
+                class="font-semibold uppercase text-blue-500 px-2 py-1 rounded-md"
+                @click="popperCut"
+              >
+                <svg
+                  class="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+
+            <!-- You can put other components too -->
+          </template>
+        </VDropdown>
+      </div>
       <!-- text section -->
 
       <div class="overflow-y-scroll h-full min-h-32 -mr-12">
@@ -428,6 +481,13 @@ export default {
     playerState() {
       return this.$refs.videoMeta
     },
+    popOverActive() {
+      if (this.view.select.active == true) {
+        return true
+      } else {
+        return false
+      }
+    },
   },
   mounted() {
     this.slider = this.$refs.slider
@@ -447,6 +507,20 @@ export default {
     }
   },
   methods: {
+    popperCopy() {
+      let selectedText = this.getSelection()
+      this.copyToClipboard(selectedText)
+      this.view.select.active = false
+    },
+    popperCut() {
+      let selectedText = this.getSelection()
+      this.copyToClipboard(selectedText)
+      this.deleteSelectedCaptions()
+    },
+    popperDelete() {
+      this.deleteSelectedCaptions()
+    },
+
     clearAll() {
       this.captions.captionGroups = [
         {
@@ -727,25 +801,7 @@ export default {
         case 'Backspace':
           if (this.view.select.active) {
             event.preventDefault()
-
-            let captions = this.view.select.end + 1 - this.view.select.start
-            if (captions < 0) {
-              this.captions.captionGroups.splice(
-                this.view.select.end,
-                Math.abs(captions)
-              )
-            } else {
-              console.log(
-                'start ' + this.view.select.start,
-                'end ' + this.view.select.end,
-                'captions ' + captions
-              )
-              this.captions.captionGroups.splice(
-                this.view.select.start,
-                captions
-              )
-            }
-            this.view.select.active = false
+            this.deleteSelectedCaptions()
           } else {
             if (i != 0 && event.target.selectionEnd === 0) {
               event.preventDefault()
@@ -842,6 +898,7 @@ export default {
         event.target.value = finalValue
       }
     },
+
     copyToClipboard(text) {
       if (window.clipboardData && window.clipboardData.setData) {
         // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
@@ -887,6 +944,47 @@ export default {
         let elem = this.$refs[`textarea-${index}`][0]
         this.setCaretPosition(elem, 0)
       })
+    },
+    deleteSelectedCaptions() {
+      if (this.view.select.active) {
+        let captions = this.view.select.end + 1 - this.view.select.start
+        if (captions < 0) {
+          let deleteLength = Math.abs(captions)
+          if (deleteLength == this.captions.captionGroups.length) {
+            this.captions.captionGroups = [
+              {
+                text: '',
+                placeholder: 'Start typing here...',
+                editTimestamp: { value: 0, string: '00:00:00' },
+                syncTimestamp: 0,
+              },
+            ]
+          } else {
+            this.captions.captionGroups.splice(
+              this.view.select.end,
+              deleteLength
+            )
+          }
+        } else {
+          let deleteLength = Math.abs(captions)
+          if (deleteLength == this.captions.captionGroups.length) {
+            this.captions.captionGroups = [
+              {
+                text: '',
+                placeholder: 'Start typing here...',
+                editTimestamp: { value: 0, string: '00:00:00' },
+                syncTimestamp: 0,
+              },
+            ]
+          } else {
+            this.captions.captionGroups.splice(
+              this.view.select.start,
+              deleteLength
+            )
+          }
+        }
+        this.view.select.active = false
+      }
     },
     deleteCaption(index) {
       if (this.captions.captionGroups.length != 1)
