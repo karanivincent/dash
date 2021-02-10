@@ -397,19 +397,21 @@
               </div>
               <div class="w-16">{{ videoMeta.durationString }}</div>
             </div>
-
+            <!-- <div v-if="videoMeta.videoPath != ''"> -->
             <video
-              ref="videoMeta"
+              ref="videoElement"
               controls
               controlsList="nodownload noremoteplayback"
               preload="metadata"
               class="focus:outline-none h-auto"
               @click.prevent
             >
-              <source src="~/assets/videos/job.mp4" type="video/mp4" />
+              <source src="" type="video/mp4" />
 
               Your browser does not support the video tag.
             </video>
+            <!-- </div>
+            <div v-else>Please upload video</div> -->
           </div>
         </div>
       </div>
@@ -479,7 +481,7 @@ export default {
   },
   computed: {
     playerState() {
-      return this.$refs.videoMeta
+      return this.$refs.videoElement
     },
     popOverActive() {
       if (this.view.select.active == true) {
@@ -491,7 +493,7 @@ export default {
   },
   mounted() {
     this.slider = this.$refs.slider
-    this.video = this.$refs.videoMeta
+    this.video = this.$refs.videoElement
     // update slider index on video timeupdate
     this.video.addEventListener('timeupdate', () => {
       this.slider.setIndex(Math.trunc(this.video.currentTime))
@@ -551,7 +553,6 @@ export default {
       this.view.select.mousedown.active = false
     },
     onMouseover(event, index) {
-      console.log(event)
       if (this.view.select.mousedown.active == true) {
         if (index > this.view.select.mousedown.index) {
           this.view.select.active = true
@@ -572,7 +573,7 @@ export default {
       var file = event.target.files[0]
       if (file) {
         var type = file.type
-        var videoNode = this.$refs.videoMeta
+        var videoNode = this.$refs.videoElement
         var canPlay = videoNode.canPlayType(type)
         canPlay === '' ? (canPlay = false) : (canPlay = true)
 
@@ -582,6 +583,7 @@ export default {
         }
 
         var fileURL = URL.createObjectURL(file)
+        // this.videoMeta.videoPath = fileURL
         videoNode.src = fileURL
         this.videoMeta.paused = true
       }
@@ -739,7 +741,6 @@ export default {
       }
     },
     keypress(event, i = -1) {
-      console.log(event.key)
       switch (event.key) {
         case 'ArrowUp':
           if (i != 0 && event.target.selectionEnd === 0) {
@@ -1044,20 +1045,20 @@ export default {
       }
     },
     setVolume() {
-      this.$refs.videoMeta.volume = this.videoMeta.volume / 100
+      this.$refs.videoElement.volume = this.videoMeta.volume / 100
     },
     addVolume() {
       if (this.videoMeta.volume < 100) this.videoMeta.volume += 5
 
-      this.$refs.videoMeta.volume = this.videoMeta.volume / 100
+      this.$refs.videoElement.volume = this.videoMeta.volume / 100
     },
     reduceVolume() {
       if (this.videoMeta.volume > 0) this.videoMeta.volume -= 5
 
-      this.$refs.videoMeta.volume = this.videoMeta.volume / 100
+      this.$refs.videoElement.volume = this.videoMeta.volume / 100
     },
     setPlaybackspeed() {
-      this.$refs.videoMeta.playbackRate = this.videoMeta.playbackspeed / 100
+      this.$refs.videoElement.playbackRate = this.videoMeta.playbackspeed / 100
     },
   },
 }
